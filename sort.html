@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>排序算法可视化系统（完整版）</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+*{box-sizing:border-box;font-family:system-ui,Segoe UI,Microsoft YaHei}
+:root{
+  --bg:#f5f7fa;
+  --card-bg:#fff;
+  --card-radius:10px;
+  --text:#333;
+  --theme:#409eff;
+  --text-secondary:#666;
+  --font-size:14px;
+  --card-gap:14px;
+  --panel-shadow:0 2px 8px rgba(0,0,0,.06);
+  --anim-speed:0.7s;
+}
+body{
+  margin:0;padding:16px;background:var(--bg);color:var(--text);
+  font-size:var(--font-size);
+  transition:all .3s;
+}
+.container{max-width:1400px;margin:0 auto}
+.panel{
+  background:var(--card-bg);border-radius:var(--card-radius);
+  padding:14px 16px;margin-bottom:12px;box-shadow:var(--panel-shadow);
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap
+}
+input,button,select{
+  padding:8px 12px;border-radius:6px;border:1px solid #ddd;
+  font-size:var(--font-size)
+}
+button{background:var(--theme);color:#fff;border:none;cursor:pointer}
+button:disabled{background:#ccc}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(420px,1fr));
+  gap:var(--card-gap)
+}
+.card{
+  background:var(--card-bg);border-radius:var(--card-radius);
+  padding:14px;box-shadow:var(--panel-shadow);
+  transition:all .3s;
+}
+.card h3{margin:0 0 6px 0;font-size:15px;cursor:pointer;color:var(--theme)}
+.card h3:hover{text-decoration:underline}
+.info{font-size:12px;color:var(--text-secondary);margin:4px 0}
+.log{
+  font-size:12px;color:var(--text);background:rgba(0,0,0,.03);
+  padding:6px;border-radius:6px;margin-top:6px;height:40px;
+  display:flex;align-items:center
+}
+canvas{width:100%!important;height:280px!important}
+#chartPanel{
+  display:none;background:var(--card-bg);padding:16px;
+  border-radius:var(--card-radius);margin-top:16px
+}
+
+.modal{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,.5);display:none;
+  justify-content:center;align-items:center;z-index:999
+}
+.modal-content{
+  background:var(--card-bg);padding:24px;border-radius:12px;
+  width:90%;max-width:500px;position:relative
+}
+#principleModal .modal-content{max-width:650px}
+#principleContent{line-height:1.7;margin-top:16px;font-size:14px}
+
+.feedback-stars{display:flex;gap:8px;margin:10px 0}
+.feedback-stars span{font-size:24px;cursor:pointer;color:#ccc}
+.feedback-stars span.active{color:#ff7f0e}
+#feedbackInput{width:100%;min-height:80px;resize:vertical;margin:10px 0}
+.feedback-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+
+.ai-assistant{
+  position:fixed;right:0;top:0;height:100vh;width:320px;
+  background:var(--card-bg);box-shadow:-2px 0 10px rgba(0,0,0,.1);
+  z-index:1000;transform:translateX(100%);transition:.4s;
+  padding:16px;display:flex;flex-direction:column
+}
+.ai-assistant.show{transform:translateX(0)}
+.ai-toggle{
+  position:absolute;left:-50px;top:20px;width:50px;height:50px;
+  background:var(--theme);color:#fff;border:none;border-radius:6px 0 0 6px;
+  cursor:pointer;font-size:22px
+}
+.ai-chat{flex:1;overflow-y:auto;margin-bottom:12px}
+.ai-msg{padding:8px 10px;border-radius:8px;margin-bottom:8px;max-width:85%}
+.ai-user{background:var(--theme);color:#fff;margin-left:auto}
+.ai-bot{background:#eee;margin-right:auto}
+.ai-input{
+  width:100%;height:60px;resize:none;border-radius:6px;padding:8px
+}
+.ai-send{
+  margin-top:8px;background:var(--theme);color:#fff;
+  border:none;padding:8px;border-radius:6px;cursor:pointer
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="panel">
+    <input id="dataInput" placeholder="数据" disabled>
+    <button onclick="openCustomModal()">自定义数据</button>
+    <button onclick="gen()">随机生成</button>
+    <input id="size" value="8" style="width:70px" placeholder="数据量">
+    <input id="delay" value="700" style="width:70px" placeholder="延迟ms">
+    <button onclick="startAll()">自动演示</button>
+    <button onclick="stopAll()">停止</button>
+    <span>图表：</span>
+    <select id="chartType">
+      <option value="bar">柱状图</option>
+      <option value="line">折线图</option>
+      <option value="radar">雷达图</option>
+    </select>
+    <button onclick="showChart()">生成对比图</button>
+    <button onclick="toggleAI()">AI助手</button>
+    <button onclick="showFeedback()" style="background:#ff7f0e">用户反馈</button>
+  </div>
+
+  <div id="cards" class="grid"></div>
+  <div id="chartPanel"><canvas id="compareCanvas"></canvas></div>
+</div>
+
+<div class="ai-assistant" id="aiPanel">
+  <button class="ai-toggle" onclick="toggleAI()">≡</button>
+  <div class="ai-chat" id="aiChat"></div>
+  <textarea id="aiInput" placeholder="告诉我你想要的页面风格，我帮你调整~"></textarea>
+  <button class="ai-send" onclick="sendAI()">发送指令</button>
+</div>
+
+<div class="modal" id="customModal">
+  <div class="modal-content">
+    <h3>自定义排序数据</h3>
+    <input id="customDataInput" placeholder="输入数字">
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button onclick="addCustomData()">添加</button>
+      <button onclick="clearCustomData()">清空</button>
+    </div>
+    <div id="customDataList" style="margin:8px 0">当前数据：无</div>
+    <div style="display:flex;gap:8px">
+      <button onclick="confirmCustomData()">确认</button>
+      <button onclick="closeCustomModal()">取消</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="principleModal">
+  <div class="modal-content">
+    <h3 id="principleTitle"></h3>
+    <div id="principleContent"></div>
+    <button onclick="closePrincipleModal()" style="margin-top:16px">关闭</button>
+  </div>
+</div>
+
+<div class="modal" id="feedbackModal">
+  <div class="modal-content">
+    <h3>用户反馈</h3>
+    <p>请对本次排序可视化系统体验进行评分：</p>
+    <div class="feedback-stars" id="stars">
+      <span onclick="setStar(1)">★</span>
+      <span onclick="setStar(2)">★</span>
+      <span onclick="setStar(3)">★</span>
+      <span onclick="setStar(4)">★</span>
+      <span onclick="setStar(5)">★</span>
+    </div>
+    <textarea id="feedbackInput" placeholder="请写下您的建议、问题或需求，帮助我们优化系统~"></textarea>
+    <div class="feedback-btns">
+      <button onclick="closeFeedback()">关闭</button>
+      <button onclick="submitFeedback()">提交反馈</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const algos = [
+  {
+    name: "冒泡排序",
+    best: "O(n)",
+    avg: "O(n²)",
+    worst: "O(n²)",
+    space: "O(1)",
+    sort: bubble,
+    principle: `冒泡排序是最基础的交换类排序算法，核心思想是通过相邻元素的比较与交换，将最大元素逐步“冒泡”到数组末尾。
+1. 从数组第一个元素开始，依次比较相邻两个元素的大小；
+2. 若前一个元素大于后一个元素，则交换两者位置；
+3. 每一轮遍历都会确定当前未排序区间中最大元素的最终位置；
+4. 重复上述过程，直到整个数组有序，最多需要n-1轮遍历。
+特点：稳定排序、实现简单、效率较低，适合小规模数据排序，最好时间复杂度出现在数组已有序的情况。`
+  },
+  {
+    name: "选择排序",
+    best: "O(n²)",
+    avg: "O(n²)",
+    worst: "O(n²)",
+    space: "O(1)",
+    sort: select,
+    principle: `选择排序是直观的选择类排序算法，核心思想是每次从未排序区间选择最小元素，放到已排序区间末尾。
+1. 将数组划分为已排序区间和未排序区间，初始已排序区间为空；
+2. 遍历未排序区间，找到最小值元素的下标；
+3. 将最小值元素与未排序区间的第一个元素交换；
+4. 扩大已排序区间，缩小未排序区间，重复操作直到全部有序。
+特点：交换次数极少，时间复杂度稳定为O(n²)，不占用额外空间，但不稳定，效率不受数据初始顺序影响。`
+  },
+  {
+    name: "插入排序",
+    best: "O(n)",
+    avg: "O(n²)",
+    worst: "O(n²)",
+    space: "O(1)",
+    sort: insert,
+    principle: `插入排序模拟整理扑克牌的过程，核心思想是将未排序元素插入到已排序区间的合适位置。
+1. 初始时将第一个元素作为已排序区间，后续元素为未排序区间；
+2. 取出未排序区间的第一个元素，从后向前扫描已排序区间；
+3. 若已排序元素大于当前元素，将其后移，直到找到合适位置；
+4. 将当前元素插入该位置，完成一次插入操作，直至全部有序。
+特点：稳定排序，对近乎有序的数据效率极高，最好时间复杂度为O(n)，适合小规模有序数据排序。`
+  },
+  {
+    name: "快速排序",
+    best: "O(nlogn)",
+    avg: "O(nlogn)",
+    worst: "O(n²)",
+    space: "O(logn)",
+    sort: quick,
+    principle: `快速排序是基于分治法的高效排序算法，是实际工程中最常用的排序算法之一。
+1. 从数组中选取一个基准元素，通常选择第一个或随机元素；
+2. 进行分区操作：将小于基准的元素放左侧，大于基准的元素放右侧；
+3. 分区完成后，基准元素到达最终正确位置；
+4. 递归对左、右子数组执行相同的分区与排序操作，直到子数组长度为1。
+特点：平均时间复杂度O(nlogn)，效率极高，不稳定排序，递归调用占用栈空间，最坏情况出现在数组完全有序。`
+  },
+  {
+    name: "归并排序",
+    best: "O(nlogn)",
+    avg: "O(nlogn)",
+    worst: "O(nlogn)",
+    space: "O(n)",
+    sort: merge,
+    principle: `归并排序是典型的分治法排序算法，核心思想是先拆分数组，再合并有序子数组。
+1. 分解：将数组从中间拆分，递归拆分为左右两个子数组，直到每个子数组只有一个元素；
+2. 治理：单个元素的子数组天然有序，开始合并操作；
+3. 合并：创建临时数组，双指针遍历两个有序子数组，按大小依次放入临时数组；
+4. 将临时数组覆盖原数组，最终得到完整有序数组。
+特点：稳定排序，时间复杂度稳定为O(nlogn)，不受数据分布影响，缺点是需要额外O(n)的辅助空间。`
+  },
+  {
+    name: "希尔排序",
+    best: "O(nlogn)",
+    avg: "O(nlogn)",
+    worst: "O(n²)",
+    space: "O(1)",
+    sort: shell,
+    principle: `希尔排序是插入排序的优化版本，也叫缩小增量排序，解决了插入排序只能相邻移动的缺点。
+1. 设定一个增量序列，将数组按增量分组，每组元素间隔为当前增量；
+2. 对每组内的元素执行插入排序，使数组整体变得基本有序；
+3. 逐步缩小增量，重复分组排序操作；
+4. 当增量为1时，数组已基本有序，执行一次完整插入排序完成排序。
+特点：效率远高于普通插入排序，时间复杂度取决于增量序列，占用空间少，是非稳定排序。`
+  }
+];
+
+let tasks = [], running = false, origin = [], results = {}, customData = [];
+let starScore = 0;
+
+function loadStyle(){
+  let s = JSON.parse(localStorage.getItem('userStyle')||'{}');
+  let r = document.documentElement.style;
+  if(s.bg) r.setProperty('--bg',s.bg);
+  if(s.cardBg) r.setProperty('--card-bg',s.cardBg);
+  if(s.radius) r.setProperty('--card-radius',s.radius);
+  if(s.color) r.setProperty('--text',s.color);
+  if(s.theme) r.setProperty('--theme',s.theme);
+  if(s.secondary) r.setProperty('--text-secondary',s.secondary);
+  if(s.fs) r.setProperty('--font-size',s.fs);
+  if(s.gap) r.setProperty('--card-gap',s.gap);
+}
+function saveStyle(k,v){
+  let s = JSON.parse(localStorage.getItem('userStyle')||'{}');
+  s[k]=v; localStorage.setItem('userStyle',JSON.stringify(s));
+  loadStyle();
+}
+loadStyle();
+
+function toggleAI(){document.getElementById('aiPanel').classList.toggle('show')}
+function addAI(text,isUser){
+  let d = document.createElement('div');
+  d.className = 'ai-msg '+(isUser?'ai-user':'ai-bot');
+  d.textContent = text;
+  let c = document.getElementById('aiChat');
+  c.appendChild(d); c.scrollTop = c.scrollHeight;
+}
+function sendAI(){
+  let i = document.getElementById('aiInput');
+  let t = i.value.trim();
+  if(!t) return; addAI(t,1); i.value='';
+  setTimeout(()=>{
+    if(/浅色|亮|白天/.test(t)){
+      saveStyle('bg','#ffffff'); saveStyle('cardBg','#f9f9f9');
+      saveStyle('color','#333'); saveStyle('secondary','#666');
+      addAI('已切换为浅色模式，页面更清爽啦',0);
+    }else if(/深色|夜间|黑色/.test(t)){
+      saveStyle('bg','#1a1a1a'); saveStyle('cardBg','#2a2a2a');
+      saveStyle('color','#eeeeee'); saveStyle('secondary','#aaaaaa');
+      addAI('已切换为深色模式，护眼更舒适',0);
+    }else if(/绿色/.test(t)){
+      saveStyle('theme','#52c41a'); addAI('主题色已更换为清新绿色',0);
+    }else if(/红色/.test(t)){
+      saveStyle('theme','#f53f3f'); addAI('主题色已更换为醒目红色',0);
+    }else if(/紫色/.test(t)){
+      saveStyle('theme','#9254de'); addAI('主题色已更换为优雅紫色',0);
+    }else if(/圆角大|圆润/.test(t)){
+      saveStyle('radius','18px'); addAI('卡片圆角已调大，更柔和',0);
+    }else if(/圆角小|直角/.test(t)){
+      saveStyle('radius','4px'); addAI('卡片圆角已调小，更干练',0);
+    }else if(/字体大/.test(t)){
+      saveStyle('fs','16px'); addAI('字体已放大，阅读更轻松',0);
+    }else if(/字体小/.test(t)){
+      saveStyle('fs','12px'); addAI('字体已缩小，展示更多内容',0);
+    }else if(/紧凑/.test(t)){
+      saveStyle('gap','8px'); addAI('布局已调紧凑，界面更整洁',0);
+    }else if(/宽松/.test(t)){
+      saveStyle('gap','22px'); addAI('布局已调宽松，视觉更舒适',0);
+    }else if(/重置|默认/.test(t)){
+      localStorage.removeItem('userStyle'); location.reload();
+      addAI('已恢复系统默认样式',0);
+    }else{
+      addAI('我可以帮你：切换深浅色、修改主题色、调整圆角/字体/布局，也可以恢复默认样式',0);
+    }
+  },600);
+}
+
+// 反馈功能（更新版）
+function showFeedback(){
+  starScore = 0;
+  document.querySelectorAll('#stars span').forEach(e=>e.classList.remove('active'));
+  document.getElementById('feedbackInput').value = '';
+  document.getElementById('feedbackModal').style.display='flex';
+}
+function closeFeedback(){
+  document.getElementById('feedbackModal').style.display='none';
+}
+function setStar(s){
+  starScore = s;
+  document.querySelectorAll('#stars span').forEach((el,i)=>{
+    el.classList.toggle('active',i<s);
+  });
+}
+function submitFeedback(){
+  if(starScore === 0){
+    alert('请先选择星级评分~');
+    return;
+  }
+  let content = document.getElementById('feedbackInput').value;
+  console.log("用户反馈提交：", {
+    score: starScore,
+    content: content,
+    time: new Date().toLocaleString()
+  });
+  alert("反馈提交成功！\n感谢您的使用与建议");
+  closeFeedback();
+}
+
+function init(){
+  const box = document.getElementById('cards');
+  box.innerHTML = '';
+  algos.forEach((a,i)=>{
+    results[a.name] = {time:0,cmp:0,swp:0};
+    box.innerHTML += `
+    <div class="card">
+      <h3 onclick="openPrincipleModal('${a.name}')">${a.name}</h3>
+      <div class="info">最好:${a.best} 平均:${a.avg} 最坏:${a.worst} 空间:${a.space}</div>
+      <div class="info">耗时:<span id="t${i}">0</span>s 比较:<span id="c${i}">0</span> 交换:<span id="s${i}">0</span></div>
+      <div class="log" id="log${i}">等待开始...</div>
+      <canvas id="cv${i}"></canvas>
+    </div>`;
+  });
+  gen();
+}
+
+function openPrincipleModal(algoName){
+  const algo = algos.find(a => a.name === algoName);
+  document.getElementById('principleTitle').textContent = algo.name + " 详细原理";
+  document.getElementById('principleContent').textContent = algo.principle;
+  document.getElementById('principleModal').style.display = 'flex';
+}
+function closePrincipleModal(){document.getElementById('principleModal').style.display='none'}
+
+function openCustomModal(){
+  customData = []; updateCustomList();
+  document.getElementById('customModal').style.display='flex';
+}
+function closeCustomModal(){document.getElementById('customModal').style.display='none'}
+function addCustomData(){
+  const num = +document.getElementById('customDataInput').value.trim();
+  if(!isNaN(num) && num>0 && num<200){
+    customData.push(num); updateCustomList();
+  }
+}
+function clearCustomData(){customData=[]; updateCustomList();}
+function updateCustomList(){
+  document.getElementById('customDataList').textContent = 
+    customData.length ? "当前数据："+customData.join(', ') : "当前数据：无";
+}
+function confirmCustomData(){
+  if(customData.length<2){alert('至少需要2个数据才能排序');return;}
+  document.getElementById('dataInput').value = customData.join(',');
+  origin = [...customData]; redrawAll(); closeCustomModal();
+}
+
+function getData(){
+  const val = document.getElementById('dataInput').value.trim();
+  return val ? val.split(',').map(Number).filter(x=>!isNaN(x)&&x>0) : null;
+}
+function gen(){
+  stopAll();
+  const n = Math.max(2,Math.min(80,+document.getElementById('size').value||8));
+  const arr = Array.from({length:n},()=>Math.floor(Math.random()*96)+4);
+  document.getElementById('dataInput').value = arr.join(',');
+  origin = [...arr]; redrawAll();
+}
+function redrawAll(){
+  const data = getData()||[];
+  algos.forEach((_,i)=>draw(i,data,[],'就绪'));
+}
+function draw(idx,arr,high,msg){
+  const cv = document.getElementById(`cv${idx}`);
+  if(!cv) return;
+  const ctx = cv.getContext('2d');
+  const w = cv.width, h = cv.height;
+  ctx.clearRect(0,0,w,h);
+  if(!arr.length) return;
+  const max = Math.max(...arr);
+  const barW = w / arr.length;
+  arr.forEach((val,i)=>{
+    const barH = h * (val/max);
+    ctx.fillStyle = high.includes(i) ? '#ff7f0e' : getComputedStyle(document.documentElement).getPropertyValue('--theme');
+    ctx.fillRect(i*barW, h-barH, barW-1, barH);
+  });
+  const log = document.getElementById(`log${idx}`);
+  if(log) log.textContent = msg;
+}
+
+function finish(idx,name,time,cmp,swp){
+  results[name] = {time,cmp,swp};
+  document.getElementById(`t${idx}`).textContent = time.toFixed(2);
+  document.getElementById(`c${idx}`).textContent = cmp;
+  document.getElementById(`s${idx}`).textContent = swp;
+  const cv = document.getElementById(`cv${idx}`);
+  const ctx = cv.getContext('2d');
+  const w = cv.width, h = cv.height;
+  ctx.clearRect(0,0,w,h);
+  const max = Math.max(...origin);
+  const barW = w/origin.length;
+  origin.forEach((val,i)=>{
+    const barH = h*(val/max);
+    ctx.fillStyle = '#52c41a';
+    ctx.fillRect(i*barW,h-barH,barW-1,barH);
+  });
+  document.getElementById(`log${idx}`).textContent = '排序完成';
+}
+
+async function startAll(){
+  stopAll();
+  let arr = getData();
+  if(!arr || arr.length<2){gen();arr=getData();}
+  origin = [...arr]; running = true;
+  const delay = Math.max(50,+document.getElementById('delay').value||700);
+  algos.forEach((a,i)=>{
+    const task = {stop:false};
+    tasks.push(task);
+    run(i,a,[...arr],task,delay);
+  });
+}
+function stopAll(){
+  running = false;
+  tasks.forEach(t=>t.stop=true);
+  tasks = [];
+}
+async function run(idx,algo,arr,task,delay){
+  const startTime = performance.now();
+  const stat = {cmp:0,swp:0};
+  try{
+    await algo.sort(arr,stat,task,async (high,msg)=>{
+      if(task.stop) throw 'stop';
+      draw(idx,arr,high,msg);
+      await new Promise(res=>setTimeout(res,delay));
+    });
+  }catch(e){}
+  const useTime = (performance.now()-startTime)/1000;
+  finish(idx,algo.name,useTime,stat.cmp,stat.swp);
+}
+
+function showChart(){
+  const names = [], timeArr = [], cmpArr = [], swpArr = [];
+  algos.forEach(a=>{
+    names.push(a.name);
+    timeArr.push(results[a.name].time);
+    cmpArr.push(results[a.name].cmp);
+    swpArr.push(results[a.name].swp);
+  });
+  document.getElementById('chartPanel').style.display = 'block';
+  const ctx = document.getElementById('compareCanvas').getContext('2d');
+  if(window.chart) window.chart.destroy();
+  const type = document.getElementById('chartType').value;
+  window.chart = new Chart(ctx,{
+    type:type,
+    data:{
+      labels:names,
+      datasets:[
+        {label:"耗时(s)",data:timeArr,backgroundColor:"#409eff",borderColor:"#409eff",fill:false},
+        {label:"比较次数",data:cmpArr,backgroundColor:"#ff7f0e",borderColor:"#ff7f0e",fill:false},
+        {label:"交换次数",data:swpArr,backgroundColor:"#52c41a",borderColor:"#52c41a",fill:false}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      scales: type!=='radar' ? {y:{beginAtZero:true}} : {}
+    }
+  });
+}
+
+async function bubble(arr,stat,task,draw){
+  const n = arr.length;
+  for(let i=0;i<n;i++){
+    for(let j=0;j<n-i-1;j++){
+      stat.cmp++;
+      await draw([j,j+1],`比较 ${arr[j]} ↔ ${arr[j+1]}`);
+      if(arr[j]>arr[j+1]){
+        [arr[j],arr[j+1]] = [arr[j+1],arr[j]];
+        stat.swp++;
+        await draw([j,j+1],'交换位置');
+      }
+      if(task.stop) return;
+    }
+  }
+}
+async function select(arr,stat,task,draw){
+  const n = arr.length;
+  for(let i=0;i<n;i++){
+    let minIdx = i;
+    for(let j=i+1;j<n;j++){
+      stat.cmp++;
+      await draw([j,minIdx],'查找最小值');
+      if(arr[j]<arr[minIdx]) minIdx = j;
+      if(task.stop) return;
+    }
+    [arr[i],arr[minIdx]] = [arr[minIdx],arr[i]];
+    stat.swp++;
+    await draw([i,minIdx],'交换最小值');
+  }
+}
+async function insert(arr,stat,task,draw){
+  const n = arr.length;
+  for(let i=1;i<n;i++){
+    const key = arr[i];
+    let j = i-1;
+    await draw([j,i],`准备插入 ${key}`);
+    while(j>=0 && key<arr[j]){
+      stat.cmp++;
+      arr[j+1] = arr[j];
+      stat.swp++;
+      await draw([j,j+1],'元素后移');
+      j--;
+      if(task.stop) return;
+    }
+    arr[j+1] = key;
+  }
+}
+async function quick(arr,stat,task,draw,l=0,r=null){
+  if(r===null) r = arr.length-1;
+  if(l>=r || task.stop) return;
+  let i=l, j=r, pivot=arr[l];
+  await draw([l],`基准值：${pivot}`);
+  while(i<=j){
+    while(i<=j && arr[i]<pivot){stat.cmp++;i++;await draw([i],'右移');if(task.stop)return}
+    while(i<=j && arr[j]>pivot){stat.cmp++;j--;await draw([j],'左移');if(task.stop)return}
+    if(i<=j){
+      [arr[i],arr[j]] = [arr[j],arr[i]];
+      stat.swp++;
+      await draw([i,j],'分区交换');
+      i++;j--;
+    }
+  }
+  await quick(arr,stat,task,draw,l,j);
+  await quick(arr,stat,task,draw,i,r);
+}
+async function merge(arr,stat,task,draw,l=0,r=null){
+  if(r===null) r = arr.length-1;
+  if(l>=r || task.stop) return;
+  const mid = Math.floor((l+r)/2);
+  await merge(arr,stat,task,draw,l,mid);
+  await merge(arr,stat,task,draw,mid+1,r);
+  const temp = [], i=l, j=mid+1;
+  while(i<=mid && j<=r){stat.cmp++;temp.push(arr[i]<=arr[j]?arr[i++]:arr[j++])}
+  while(i<=mid) temp.push(arr[i++]);
+  while(j<=r) temp.push(arr[j++]);
+  for(let k=0;k<temp.length;k++){
+    arr[l+k] = temp[k];
+    stat.swp++;
+    await draw([l+k],'归并元素');
+    if(task.stop) return;
+  }
+}
+async function shell(arr,stat,task,draw){
+  const n = arr.length;
+  for(let gap=n>>1;gap>0;gap>>=1){
+    for(let i=gap;i<n;i++){
+      const key = arr[i];
+      let j = i;
+      while(j>=gap && arr[j-gap]>key){
+        stat.cmp++;
+        arr[j] = arr[j-gap];
+        stat.swp++;
+        await draw([j-gap,j],'分组交换');
+        j -= gap;
+        if(task.stop) return;
+      }
+      arr[j] = key;
+    }
+  }
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
