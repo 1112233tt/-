@@ -1,634 +1,1212 @@
+ 
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>排序算法可视化系统（完整版）</title>
+<title>六大排序算法学习平台(增强版)</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-*{box-sizing:border-box;font-family:system-ui,Segoe UI,Microsoft YaHei}
-:root{
-  --bg:#f5f7fa;
-  --card-bg:#fff;
-  --card-radius:10px;
-  --text:#333;
-  --theme:#409eff;
-  --text-secondary:#666;
-  --font-size:14px;
-  --card-gap:14px;
-  --panel-shadow:0 2px 8px rgba(0,0,0,.06);
-  --anim-speed:0.7s;
+:root {
+  --primary-bg: #f7f9fc;
+  --panel-bg: #fff;
+  --text-color: #222;
+  --primary-btn: #4169E1;
 }
-body{
-  margin:0;padding:16px;background:var(--bg);color:var(--text);
-  font-size:var(--font-size);
-  transition:all .3s;
-}
-.container{max-width:1400px;margin:0 auto}
-.panel{
-  background:var(--card-bg);border-radius:var(--card-radius);
-  padding:14px 16px;margin-bottom:12px;box-shadow:var(--panel-shadow);
-  display:flex;gap:10px;align-items:center;flex-wrap:wrap
-}
-input,button,select{
-  padding:8px 12px;border-radius:6px;border:1px solid #ddd;
-  font-size:var(--font-size)
-}
-button{background:var(--theme);color:#fff;border:none;cursor:pointer}
-button:disabled{background:#ccc}
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(420px,1fr));
-  gap:var(--card-gap)
-}
-.card{
-  background:var(--card-bg);border-radius:var(--card-radius);
-  padding:14px;box-shadow:var(--panel-shadow);
-  transition:all .3s;
-}
-.card h3{margin:0 0 6px 0;font-size:15px;cursor:pointer;color:var(--theme)}
-.card h3:hover{text-decoration:underline}
-.info{font-size:12px;color:var(--text-secondary);margin:4px 0}
-.log{
-  font-size:12px;color:var(--text);background:rgba(0,0,0,.03);
-  padding:6px;border-radius:6px;margin-top:6px;height:40px;
-  display:flex;align-items:center
-}
-canvas{width:100%!important;height:280px!important}
-#chartPanel{
-  display:none;background:var(--card-bg);padding:16px;
-  border-radius:var(--card-radius);margin-top:16px
-}
-
-.modal{
-  position:fixed;top:0;left:0;width:100%;height:100%;
-  background:rgba(0,0,0,.5);display:none;
-  justify-content:center;align-items:center;z-index:999
-}
-.modal-content{
-  background:var(--card-bg);padding:24px;border-radius:12px;
-  width:90%;max-width:500px;position:relative
-}
-#principleModal .modal-content{max-width:650px}
-#principleContent{line-height:1.7;margin-top:16px;font-size:14px}
-
-.feedback-stars{display:flex;gap:8px;margin:10px 0}
-.feedback-stars span{font-size:24px;cursor:pointer;color:#ccc}
-.feedback-stars span.active{color:#ff7f0e}
-#feedbackInput{width:100%;min-height:80px;resize:vertical;margin:10px 0}
-.feedback-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
-
-.ai-assistant{
-  position:fixed;right:0;top:0;height:100vh;width:320px;
-  background:var(--card-bg);box-shadow:-2px 0 10px rgba(0,0,0,.1);
-  z-index:1000;transform:translateX(100%);transition:.4s;
-  padding:16px;display:flex;flex-direction:column
-}
-.ai-assistant.show{transform:translateX(0)}
-.ai-toggle{
-  position:absolute;left:-50px;top:20px;width:50px;height:50px;
-  background:var(--theme);color:#fff;border:none;border-radius:6px 0 0 6px;
-  cursor:pointer;font-size:22px
-}
-.ai-chat{flex:1;overflow-y:auto;margin-bottom:12px}
-.ai-msg{padding:8px 10px;border-radius:8px;margin-bottom:8px;max-width:85%}
-.ai-user{background:var(--theme);color:#fff;margin-left:auto}
-.ai-bot{background:#eee;margin-right:auto}
-.ai-input{
-  width:100%;height:60px;resize:none;border-radius:6px;padding:8px
-}
-.ai-send{
-  margin-top:8px;background:var(--theme);color:#fff;
-  border:none;padding:8px;border-radius:6px;cursor:pointer
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif}
+body{background:var(--primary-bg);color:var(--text-color);transition: all 0.3s ease}
+.container{max-width:1400px;margin:0 auto;padding:12px}
+.panel{background:var(--panel-bg);border-radius:12px;padding:16px;margin:12px 0;box-shadow:0 2px 10px #00000010;transition: all 0.3s ease}
+.btn{padding:8px 14px;background:var(--primary-btn);color:white;border:none;border-radius:8px;margin:4px;cursor:pointer;transition: opacity 0.2s}.btn:hover{opacity:.9}
+.btn-green{background:#28a745}
+.btn-orange{background:#fd7e14}
+.btn-red{background:#dc3545}
+.btn-purple{background:#6f42c1}
+.btn-gray{background:#6c757d}
+.btn-sm{padding:6px 10px;font-size:13px}
+.admin-btn{background:#6610f2; margin-left:12px}
+.screen-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:12px 0}
+.screen{border:1px solid #e0e0e0;border-radius:10px;padding:10px}
+.bar-box{display:flex;gap:3px;align-items:flex-end;height:220px;padding:4px;background:#f8f9fa;border-radius:8px;overflow:hidden}
+.bar{flex:1;min-width:3px;max-width:50px;background:#4169E1;border-radius:2px 2px 0 0;transition:height 0.15s ease}
+.bar.active{background:#dc3545}
+.bar.done{background:#28a745}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:99}
+.modal-body{background:white;padding:24px;border-radius:12px;min-width:360px;max-height:80vh;overflow-y:auto}
+.chart-box{height:320px;margin:12px 0}
+.question{margin:12px 0;padding:12px;background:#f8f9fa;border-radius:8px}
+.option{margin:6px 0}
+.log-box{max-height:220px;overflow-y:auto}
+.log{padding:6px;margin:4px;background:#f1f3f5;border-radius:6px;font-size:14px}
+.star{font-size:24px;cursor:pointer;color:#ccc}
+.star.on{color:#ffc107}
+.rank-item{display:flex;justify-content:space-between;padding:6px;margin:4px;background:#f1f3f5;border-radius:6px}
+.feedback-item{display:block;padding:12px;margin:8px 0;background:#f8f9fa;border-radius:8px;border:1px solid #eee}
+.feedback-user{font-weight:bold;color:#333}
+.feedback-stars{color:#ff9800;margin:0 8px}
+.feedback-time{font-size:12px;color:#666}
+.feedback-text{margin-top:8px;padding-top:8px;border-top:1px solid #ddd}
+.congrats{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:32px;color:#28a745;font-weight:bold;animation:jump 1s infinite;z-index:100;background:white;padding:20px;border-radius:12px;box-shadow:0 0 20px rgba(0,0,0,0.2)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;margin:12px 0}
+.card{padding:16px;border:1px solid #e0e0e0;border-radius:10px;line-height:1.6}
+input,textarea,select{width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;margin:6px 0}
+.title{margin-bottom:12px}
+pre{background:#f8f9fa;padding:8px;border-radius:4px;overflow-x:auto}
+.info-text{color:#222;background:#e67ff;padding:8px;border-radius:6px;margin-top:6px;font-size:14px}
+.algo-label{font-size:14px;color:#165DFF;margin-bottom:4px;font-weight:bold}
+.password-input{margin:12px 0;font-family:monospace}
+.difficulty-tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:12px;margin-left:8px}
+.difficulty-easy{background:#d4edda;color:#155724}
+.difficulty-medium{background:#fff3cd;color:#856404}
+.difficulty-hard{background:#f8d7da;color:#721c24}
+.difficulty-original{background:#e2d9f3;color:#6f42c1}
+.type-tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:12px;margin-right:8px;background:#e9ecef;color:#495057}
+.progress-bar{height:6px;background:#e9ecef;border-radius:3px;margin:8px 0}
+.progress-fill{height:100%;background:#28a745;border-radius:3px;transition:width 0.3s}
+.ai-menu{background:#f0f4ff; padding:12px; border-radius:8px; margin-bottom:10px; border-left:4px solid #4169E1; font-size:14px; line-height:1.8;}
+.ai-menu b{color:#4169E1}
 </style>
 </head>
 <body>
-
 <div class="container">
-  <div class="panel">
-    <input id="dataInput" placeholder="数据" disabled>
-    <button onclick="openCustomModal()">自定义数据</button>
-    <button onclick="gen()">随机生成</button>
-    <input id="size" value="8" style="width:70px" placeholder="数据量">
-    <input id="delay" value="700" style="width:70px" placeholder="延迟ms">
-    <button onclick="startAll()">自动演示</button>
-    <button onclick="stopAll()">停止</button>
-    <span>图表：</span>
-    <select id="chartType">
-      <option value="bar">柱状图</option>
-      <option value="line">折线图</option>
-      <option value="radar">雷达图</option>
-    </select>
-    <button onclick="showChart()">生成对比图</button>
-    <button onclick="toggleAI()">AI助手</button>
-    <button onclick="showFeedback()" style="background:#ff7f0e">用户反馈</button>
+<!-- 顶部用户面板 -->
+<div class="panel" id="userPanel">
+  <div id="userInfo"></div>
+  <div id="recordInfo"></div>
+  <button class="btn admin-btn" onclick="openAdminLogin()">管理员入口</button>
+</div>
+
+<!-- 主功能区 -->
+<div class="panel">
+<h2 class="title">排序算法可视化</h2>
+<div>
+<button class="btn" onclick="genRandom()">随机数据</button>
+<button class="btn" onclick="openCustom()">自定义数据</button>
+<button class="btn btn-green" onclick="startAll()">开始排序</button>
+<button class="btn btn-red" onclick="stopAll()">停止排序</button>
+<select id="speedSelect" class="btn" style="color:#222;background:#fff">
+  <option value="0.5">0.5倍速</option>
+  <option value="1" selected>1倍速</option>
+  <option value="2">2倍速</option>
+  <option value="3">3倍速</option>
+</select>
+<button class="btn btn-orange" onclick="showCharts()">对比图表</button>
+<button class="btn" onclick="openPractice()">在线练习</button>
+<button class="btn btn-purple" onclick="openExam()">模拟考试</button>
+<button class="btn" onclick="openFeedback()">用户反馈</button>
+<button class="btn" onclick="openAI()">AI助手</button>
+<button class="btn" onclick="openRecord()">学习记录</button>
+</div>
+</div>
+
+<!-- 可视化区域 -->
+<div class="screen-grid" id="screens"></div>
+<div class="panel"><div class="log-box" id="log"></div></div>
+
+<!-- 算法介绍 -->
+<div class="panel">
+<h2 class="title">算法原理详解(完整版)</h2>
+<div class="card-grid" id="algoCards"></div>
+</div>
+</div>
+
+<!-- ==================== 模态窗口 ==================== -->
+
+<!-- 自定义数据 -->
+<div class="modal" id="customModal"><div class="modal-body">
+<h3>自定义数组</h3>
+<input id="customArr" placeholder="例如:10,30,50,20,70">
+<button class="btn" onclick="setCustom()">确定</button>
+<button class="btn btn-red" onclick="closeModal('customModal')">取消</button>
+</div></div>
+
+<!-- 练习 -->
+<div class="modal" id="practiceModal"><div class="modal-body">
+<h3>在线练习 <span style="font-size:14px;color:#666">(基础题随机抽取)</span></h3>
+<div id="practiceArea"></div>
+<div class="progress-bar"><div class="progress-fill" id="practiceProgress" style="width:0%"></div></div>
+<div style="display:flex;justify-content:space-between;margin-top:12px">
+  <button class="btn btn-green" onclick="submitPractice()">提交练习</button>
+  <button class="btn btn-red" onclick="closeModal('practiceModal')">关闭</button>
+</div>
+</div></div>
+
+<!-- 考试 -->
+<div class="modal" id="examModal"><div class="modal-body">
+<h3>模拟考试 <span style="font-size:14px;color:#666">(高级/基础/进阶/原创混合)</span></h3>
+<div id="examArea"></div>
+<div class="progress-bar"><div class="progress-fill" id="examProgress" style="width:0%"></div></div>
+<div style="display:flex;justify-content:space-between;margin-top:12px">
+  <button class="btn btn-green" onclick="submitExam()">交卷</button>
+  <button class="btn btn-red" onclick="closeModal('examModal')">关闭</button>
+</div>
+</div></div>
+
+<!-- 反馈 -->
+<div class="modal" id="feedbackModal"><div class="modal-body">
+<h3>用户反馈</h3>
+<div>
+<span class="star" onclick="setStar(1)">★</span>
+<span class="star" onclick="setStar(2)">★</span>
+<span class="star" onclick="setStar(3)">★</span>
+<span class="star" onclick="setStar(4)">★</span>
+<span class="star" onclick="setStar(5)">★</span>
+</div>
+<textarea rows="4" id="feedText" placeholder="请输入反馈内容"></textarea>
+<button class="btn" onclick="submitFeedback()">提交反馈</button>
+<button class="btn btn-red" onclick="closeModal('feedbackModal')">关闭</button>
+</div></div>
+
+<!-- AI助手 -->
+<div class="modal" id="aiModal"><div class="modal-body">
+<h3>🤖 AI个性化助手</h3>
+<div id="aiMenuContainer"></div>
+<div id="aiReply" style="min-height:80px;background:#f8f9fa;padding:10px;border-radius:8px;margin:10px 0;"></div>
+<input id="askAI" placeholder="输入功能编号(如1)或提问">
+<button class="btn" onclick="askAI()">执行/提问</button>
+<button class="btn btn-red" onclick="closeModal('aiModal')">关闭</button>
+</div></div>
+
+<!-- 图表 -->
+<div class="modal" id="chartModal"><div class="modal-body">
+<h3>多维度对比图表</h3>
+<div class="chart-box"><canvas id="chartTime"></canvas></div>
+<div class="chart-box"><canvas id="chartCompare"></canvas></div>
+<div class="chart-box"><canvas id="chartRadar"></canvas></div>
+<button class="btn btn-red" onclick="closeModal('chartModal')">关闭</button>
+</div></div>
+
+<!-- 记录 -->
+<div class="modal" id="recordModal"><div class="modal-body">
+<h3>学习记录</h3><div id="recordList"></div>
+<button class="btn btn-red" onclick="closeModal('recordModal')" style="margin-top:15px;">关闭</button>
+</div></div>
+
+<!-- 管理员登录模态窗 -->
+<div class="modal" id="adminLoginModal"><div class="modal-body">
+<h3>🔐 管理员登录</h3>
+<p style="color:#666;font-size:14px;margin-bottom:12px">输入管理密码查看所有用户反馈</p>
+<input type="password" id="adminPassword" class="password-input" placeholder="输入管理员密码">
+<div style="display:flex;gap:8px;margin-top:12px">
+  <button class="btn btn-purple" onclick="checkAdminPassword()">进入后台</button>
+  <button class="btn btn-gray" onclick="changeAdminMode()">修改密码</button>
+  <button class="btn btn-red" onclick="closeModal('adminLoginModal')">取消</button>
+</div>
+</div></div>
+
+<!-- 管理员后台模态窗 -->
+<div class="modal" id="adminBackendModal"><div class="modal-body" style="min-width:600px">
+<h3>📊 反馈管理中心</h3>
+<div style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+  <div>
+    <span style="font-size:14px;color:#666">总反馈数: <span id="totalFeedbacks">0</span> 条</span>
+    <span style="font-size:14px;color:#666;margin-left:12px">平均评分: <span id="avgRating">0.0</span></span>
   </div>
-
-  <div id="cards" class="grid"></div>
-  <div id="chartPanel"><canvas id="compareCanvas"></canvas></div>
-</div>
-
-<div class="ai-assistant" id="aiPanel">
-  <button class="ai-toggle" onclick="toggleAI()">≡</button>
-  <div class="ai-chat" id="aiChat"></div>
-  <textarea id="aiInput" placeholder="告诉我你想要的页面风格，我帮你调整~"></textarea>
-  <button class="ai-send" onclick="sendAI()">发送指令</button>
-</div>
-
-<div class="modal" id="customModal">
-  <div class="modal-content">
-    <h3>自定义排序数据</h3>
-    <input id="customDataInput" placeholder="输入数字">
-    <div style="display:flex;gap:8px;margin-top:8px">
-      <button onclick="addCustomData()">添加</button>
-      <button onclick="clearCustomData()">清空</button>
-    </div>
-    <div id="customDataList" style="margin:8px 0">当前数据：无</div>
-    <div style="display:flex;gap:8px">
-      <button onclick="confirmCustomData()">确认</button>
-      <button onclick="closeCustomModal()">取消</button>
-    </div>
+  <div>
+    <button class="btn btn-purple btn-sm" onclick="exportFeedbacks()">📥 导出</button>
+    <button class="btn btn-red btn-sm" onclick="clearAllFeedbacks()">🗑️ 清空</button>
+    <button class="btn btn-gray btn-sm" onclick="changeAdminPassword()">🔑 改密</button>
+    <button class="btn btn-red btn-sm" onclick="logoutAdmin()">🚪 退出</button>
   </div>
 </div>
+<div id="allFeedbacksList" style="max-height:400px;overflow-y:auto;margin-top:12px"></div>
+</div></div>
 
-<div class="modal" id="principleModal">
-  <div class="modal-content">
-    <h3 id="principleTitle"></h3>
-    <div id="principleContent"></div>
-    <button onclick="closePrincipleModal()" style="margin-top:16px">关闭</button>
-  </div>
+<!-- 修改密码模态窗 -->
+<div class="modal" id="changePwdModal"><div class="modal-body">
+<h3>🔑 修改管理员密码</h3>
+<div style="margin:12px 0">
+  <input type="password" id="oldPwdInput" class="password-input" placeholder="原密码">
+  <input type="password" id="newPwdInput" class="password-input" placeholder="新密码 (至少6位)">
+  <input type="password" id="confirmPwdInput" class="password-input" placeholder="确认新密码">
 </div>
-
-<div class="modal" id="feedbackModal">
-  <div class="modal-content">
-    <h3>用户反馈</h3>
-    <p>请对本次排序可视化系统体验进行评分：</p>
-    <div class="feedback-stars" id="stars">
-      <span onclick="setStar(1)">★</span>
-      <span onclick="setStar(2)">★</span>
-      <span onclick="setStar(3)">★</span>
-      <span onclick="setStar(4)">★</span>
-      <span onclick="setStar(5)">★</span>
-    </div>
-    <textarea id="feedbackInput" placeholder="请写下您的建议、问题或需求，帮助我们优化系统~"></textarea>
-    <div class="feedback-btns">
-      <button onclick="closeFeedback()">关闭</button>
-      <button onclick="submitFeedback()">提交反馈</button>
-    </div>
-  </div>
+<div style="display:flex;gap:8px">
+  <button class="btn btn-green" onclick="updateAdminPassword()">确定修改</button>
+  <button class="btn btn-red" onclick="cancelChangePwd()">取消</button>
 </div>
+</div></div>
 
 <script>
-const algos = [
-  {
-    name: "冒泡排序",
-    best: "O(n)",
-    avg: "O(n²)",
-    worst: "O(n²)",
-    space: "O(1)",
-    sort: bubble,
-    principle: `冒泡排序是最基础的交换类排序算法，核心思想是通过相邻元素的比较与交换，将最大元素逐步“冒泡”到数组末尾。
-1. 从数组第一个元素开始，依次比较相邻两个元素的大小；
-2. 若前一个元素大于后一个元素，则交换两者位置；
-3. 每一轮遍历都会确定当前未排序区间中最大元素的最终位置；
-4. 重复上述过程，直到整个数组有序，最多需要n-1轮遍历。
-特点：稳定排序、实现简单、效率较低，适合小规模数据排序，最好时间复杂度出现在数组已有序的情况。`
-  },
-  {
-    name: "选择排序",
-    best: "O(n²)",
-    avg: "O(n²)",
-    worst: "O(n²)",
-    space: "O(1)",
-    sort: select,
-    principle: `选择排序是直观的选择类排序算法，核心思想是每次从未排序区间选择最小元素，放到已排序区间末尾。
-1. 将数组划分为已排序区间和未排序区间，初始已排序区间为空；
-2. 遍历未排序区间，找到最小值元素的下标；
-3. 将最小值元素与未排序区间的第一个元素交换；
-4. 扩大已排序区间，缩小未排序区间，重复操作直到全部有序。
-特点：交换次数极少，时间复杂度稳定为O(n²)，不占用额外空间，但不稳定，效率不受数据初始顺序影响。`
-  },
-  {
-    name: "插入排序",
-    best: "O(n)",
-    avg: "O(n²)",
-    worst: "O(n²)",
-    space: "O(1)",
-    sort: insert,
-    principle: `插入排序模拟整理扑克牌的过程，核心思想是将未排序元素插入到已排序区间的合适位置。
-1. 初始时将第一个元素作为已排序区间，后续元素为未排序区间；
-2. 取出未排序区间的第一个元素，从后向前扫描已排序区间；
-3. 若已排序元素大于当前元素，将其后移，直到找到合适位置；
-4. 将当前元素插入该位置，完成一次插入操作，直至全部有序。
-特点：稳定排序，对近乎有序的数据效率极高，最好时间复杂度为O(n)，适合小规模有序数据排序。`
-  },
-  {
-    name: "快速排序",
-    best: "O(nlogn)",
-    avg: "O(nlogn)",
-    worst: "O(n²)",
-    space: "O(logn)",
-    sort: quick,
-    principle: `快速排序是基于分治法的高效排序算法，是实际工程中最常用的排序算法之一。
-1. 从数组中选取一个基准元素，通常选择第一个或随机元素；
-2. 进行分区操作：将小于基准的元素放左侧，大于基准的元素放右侧；
-3. 分区完成后，基准元素到达最终正确位置；
-4. 递归对左、右子数组执行相同的分区与排序操作，直到子数组长度为1。
-特点：平均时间复杂度O(nlogn)，效率极高，不稳定排序，递归调用占用栈空间，最坏情况出现在数组完全有序。`
-  },
-  {
-    name: "归并排序",
-    best: "O(nlogn)",
-    avg: "O(nlogn)",
-    worst: "O(nlogn)",
-    space: "O(n)",
-    sort: merge,
-    principle: `归并排序是典型的分治法排序算法，核心思想是先拆分数组，再合并有序子数组。
-1. 分解：将数组从中间拆分，递归拆分为左右两个子数组，直到每个子数组只有一个元素；
-2. 治理：单个元素的子数组天然有序，开始合并操作；
-3. 合并：创建临时数组，双指针遍历两个有序子数组，按大小依次放入临时数组；
-4. 将临时数组覆盖原数组，最终得到完整有序数组。
-特点：稳定排序，时间复杂度稳定为O(nlogn)，不受数据分布影响，缺点是需要额外O(n)的辅助空间。`
-  },
-  {
-    name: "希尔排序",
-    best: "O(nlogn)",
-    avg: "O(nlogn)",
-    worst: "O(n²)",
-    space: "O(1)",
-    sort: shell,
-    principle: `希尔排序是插入排序的优化版本，也叫缩小增量排序，解决了插入排序只能相邻移动的缺点。
-1. 设定一个增量序列，将数组按增量分组，每组元素间隔为当前增量；
-2. 对每组内的元素执行插入排序，使数组整体变得基本有序；
-3. 逐步缩小增量，重复分组排序操作；
-4. 当增量为1时，数组已基本有序，执行一次完整插入排序完成排序。
-特点：效率远高于普通插入排序，时间复杂度取决于增量序列，占用空间少，是非稳定排序。`
-  }
+// ==================== 全局变量 ====================
+let running = false;
+let stopFlag = false;
+let isChangingPwd = false;
+
+// 从本地存储获取用户，不存在则弹窗创建
+let user = localStorage.getItem("sort_user") || prompt("请输入用户名:");
+if(user) localStorage.setItem("sort_user", user);
+
+// 初始化管理员密码（默认'admin123'）
+if (!localStorage.getItem("admin_password")) {
+  localStorage.setItem("admin_password", "admin123");
+}
+
+// 个性化配置初始化
+if (!localStorage.getItem("user_theme")) {
+  localStorage.setItem("user_theme", JSON.stringify({bg:"#f7f9fc", panelBg:"#fff", textColor:"#222", btnColor:"#4169E1", layout:"grid"}));
+}
+
+let algoList = [
+  {name:"冒泡排序", key:"bubble", color:"#4169E1"},
+  {name:"选择排序", key:"select", color:"#fd7e14"},
+  {name:"插入排序", key:"insert", color:"#20c997"},
+  {name:"希尔排序", key:"shell", color:"#6f42c1"},
+  {name:"归并排序", key:"merge", color:"#d63384"},
+  {name:"快速排序", key:"quick", color:"#198754"},
 ];
 
-let tasks = [], running = false, origin = [], results = {}, customData = [];
-let starScore = 0;
+let screens = [];
+let arrOrigin = [];
+let arrList = [];
+let stats = [];
+let star = 0;
+let baseDelay = 120;
+let currentPracticeQuestions = [];
+let currentExamQuestions = [];
 
-function loadStyle(){
-  let s = JSON.parse(localStorage.getItem('userStyle')||'{}');
-  let r = document.documentElement.style;
-  if(s.bg) r.setProperty('--bg',s.bg);
-  if(s.cardBg) r.setProperty('--card-bg',s.cardBg);
-  if(s.radius) r.setProperty('--card-radius',s.radius);
-  if(s.color) r.setProperty('--text',s.color);
-  if(s.theme) r.setProperty('--theme',s.theme);
-  if(s.secondary) r.setProperty('--text-secondary',s.secondary);
-  if(s.fs) r.setProperty('--font-size',s.fs);
-  if(s.gap) r.setProperty('--card-gap',s.gap);
-}
-function saveStyle(k,v){
-  let s = JSON.parse(localStorage.getItem('userStyle')||'{}');
-  s[k]=v; localStorage.setItem('userStyle',JSON.stringify(s));
-  loadStyle();
-}
-loadStyle();
+// ==================== 扩充后的题库数据 ====================
+const questionBank = {
+  // 基础题库 (难度: easy)
+  easy: [
+    {type:"单选", q:"冒泡排序的平均时间复杂度是?", opts:["O(n)","O(n²)","O(nlogn)","O(1)"], ans:"O(n²)", score:5},
+    {type:"判断", q:"冒泡排序是稳定排序算法?", ans:true, score:5},
+    {type:"单选", q:"选择排序的空间复杂度是?", opts:["O(n)","O(n²)","O(1)","O(logn)"], ans:"O(1)", score:5},
+    {type:"单选", q:"插入排序的最坏时间复杂度是?", opts:["O(n)","O(n²)","O(nlogn)","O(1)"], ans:"O(n²)", score:5},
+    {type:"判断", q:"选择排序是稳定排序算法?", ans:false, score:5},
+    {type:"单选", q:"归并排序需要额外的存储空间?", opts:["需要","不需要"], ans:"需要", score:5},
+    {type:"判断", q:"快速排序是最坏的排序算法?", ans:false, score:5},
+    {type:"单选", q:"希尔排序又称为?", opts:["缩小增量排序","冒泡排序","快速排序","归并排序"], ans:"缩小增量排序", score:5},
+  ],
+  // 进阶题库 (难度: medium)
+  medium: [
+    {type:"多选", q:"下列属于稳定排序算法的是?", opts:["冒泡排序","插入排序","快速排序","归并排序"], ans:["冒泡排序","插入排序","归并排序"], score:10},
+    {type:"单选", q:"快速排序在最坏情况下的时间复杂度是?", opts:["O(n)","O(nlogn)","O(n²)","O(1)"], ans:"O(n²)", score:8},
+    {type:"判断", q:"希尔排序是插入排序的改进版本?", ans:true, score:8},
+    {type:"程序", q:"冒泡排序的核心交换语句是?", ans:"if(arr[j] > arr[j+1]) { swap(arr[j], arr[j+1]); }", score:10},
+    {type:"单选", q:"快速排序每次划分的核心思想是?", opts:["分治","贪心","动态规划","回溯"], ans:"分治", score:8},
+    {type:"判断", q:"归并排序是原地排序算法?", ans:false, score:8},
+  ],
+  // 高级题库 (难度: hard)
+  hard: [
+    {type:"多选", q:"下列算法中平均时间复杂度为O(nlogn)的是?", opts:["冒泡排序","快速排序","归并排序","希尔排序"], ans:["快速排序","归并排序","希尔排序"], score:15},
+    {type:"单选", q:"归并排序的空间复杂度是?", opts:["O(1)","O(n)","O(logn)","O(n²)"], ans:"O(n)", score:12},
+    {type:"程序", q:"快速排序分区函数的核心代码是?", ans:"while(i < j) { while(i < j && arr[j] >= pivot) j--; arr[i] = arr[j]; while(i < j && arr[i] <= pivot) i++; arr[j] = arr[i]; }", score:15},
+    {type:"单选", q:"在数据基本有序的情况下，哪种排序算法效率最高?", opts:["快速排序","插入排序","选择排序","归并排序"], ans:"插入排序", score:12},
+    {type:"判断", q:"快速排序的空间复杂度最坏为O(n)?", ans:true, score:15},
+  ],
+  // 原创题库 (难度: original)
+  original: [
+    {type:"程序", q:"请手写一个优化版的冒泡排序（增加flag判断是否已有序）", ans:"bool flag = true; for(int i=0; i<n-1 && flag; i++) { flag=false; for(int j=0; j<n-i-1; j++) if(arr[j]>arr[j+1]){ swap; flag=true; } }", score:20},
+    {type:"程序", q:"请实现将两个已排序数组合并为一个有序数组的merge函数", ans:"while(i<a.length && j<b.length) { if(a[i]<=b[j]) c[k++]=a[i++]; else c[k++]=b[j++]; } while(i<a.length) c[k++]=a[i++]; while(j<b.length) c[k++]=b[j++];", score:20},
+    {type:"单选", q:"若待排序列存在大量重复元素，以下哪种排序优化后效率最高?", opts:["三路快排","普通快排","冒泡排序","选择排序"], ans:"三路快排", score:20},
+    {type:"判断", q:"对于小规模数据，插入排序的实际执行速度可能快于快速排序?", ans:true, score:20},
+  ]
+};
 
-function toggleAI(){document.getElementById('aiPanel').classList.toggle('show')}
-function addAI(text,isUser){
-  let d = document.createElement('div');
-  d.className = 'ai-msg '+(isUser?'ai-user':'ai-bot');
-  d.textContent = text;
-  let c = document.getElementById('aiChat');
-  c.appendChild(d); c.scrollTop = c.scrollHeight;
-}
-function sendAI(){
-  let i = document.getElementById('aiInput');
-  let t = i.value.trim();
-  if(!t) return; addAI(t,1); i.value='';
-  setTimeout(()=>{
-    if(/浅色|亮|白天/.test(t)){
-      saveStyle('bg','#ffffff'); saveStyle('cardBg','#f9f9f9');
-      saveStyle('color','#333'); saveStyle('secondary','#666');
-      addAI('已切换为浅色模式，页面更清爽啦',0);
-    }else if(/深色|夜间|黑色/.test(t)){
-      saveStyle('bg','#1a1a1a'); saveStyle('cardBg','#2a2a2a');
-      saveStyle('color','#eeeeee'); saveStyle('secondary','#aaaaaa');
-      addAI('已切换为深色模式，护眼更舒适',0);
-    }else if(/绿色/.test(t)){
-      saveStyle('theme','#52c41a'); addAI('主题色已更换为清新绿色',0);
-    }else if(/红色/.test(t)){
-      saveStyle('theme','#f53f3f'); addAI('主题色已更换为醒目红色',0);
-    }else if(/紫色/.test(t)){
-      saveStyle('theme','#9254de'); addAI('主题色已更换为优雅紫色',0);
-    }else if(/圆角大|圆润/.test(t)){
-      saveStyle('radius','18px'); addAI('卡片圆角已调大，更柔和',0);
-    }else if(/圆角小|直角/.test(t)){
-      saveStyle('radius','4px'); addAI('卡片圆角已调小，更干练',0);
-    }else if(/字体大/.test(t)){
-      saveStyle('fs','16px'); addAI('字体已放大，阅读更轻松',0);
-    }else if(/字体小/.test(t)){
-      saveStyle('fs','12px'); addAI('字体已缩小，展示更多内容',0);
-    }else if(/紧凑/.test(t)){
-      saveStyle('gap','8px'); addAI('布局已调紧凑，界面更整洁',0);
-    }else if(/宽松/.test(t)){
-      saveStyle('gap','22px'); addAI('布局已调宽松，视觉更舒适',0);
-    }else if(/重置|默认/.test(t)){
-      localStorage.removeItem('userStyle'); location.reload();
-      addAI('已恢复系统默认样式',0);
-    }else{
-      addAI('我可以帮你：切换深浅色、修改主题色、调整圆角/字体/布局，也可以恢复默认样式',0);
-    }
-  },600);
+const algoIntro = {
+  bubble: '<h4>冒泡排序</h4><p>重复比较交换相邻元素,大值下沉</p><p>时间 O(n²) 空间O(1) 稳定</p>',
+  select: '<h4>选择排序</h4><p>每轮选最小值放到前面</p><p>时间 O(n²) 空间 O(1) 不稳定</p>',
+  insert: '<h4>插入排序</h4><p>将当前元素插入前面有序区</p><p>时间 O(n²) 空间 O(1) 稳定</p>',
+  shell: '<h4>希尔排序</h4><p>分组插入+缩小增量</p><p>时间 O(nlogn) 空间 O(1) 不稳定</p>',
+  merge: '<h4>归并排序</h4><p>分治+合并有序数组</p><p>时间 O(nlogn) 空间 O(n) 稳定</p>',
+  quick: '<h4>快速排序</h4><p>基准分区递归排序</p><p>时间 O(nlogn) 空间 O(logn) 不稳定</p>'
+};
+
+// ==================== 页面初始化 ====================
+window.onload = function() {
+  initScreens();
+  initAlgoCards();
+  loadRecord();
+  genRandom();
+  refreshUserPanel();
+  closeAllModals();
+  applyUserTheme(); // 应用用户个性化主题
+};
+
+// ==================== 通用函数 ====================
+function closeModal(modalId) { 
+  document.getElementById(modalId).style.display = "none";
 }
 
-// 反馈功能（更新版）
-function showFeedback(){
-  starScore = 0;
-  document.querySelectorAll('#stars span').forEach(e=>e.classList.remove('active'));
-  document.getElementById('feedbackInput').value = '';
-  document.getElementById('feedbackModal').style.display='flex';
+function closeAllModals() { 
+  document.querySelectorAll(".modal").forEach(m => m.style.display = "none");
 }
-function closeFeedback(){
-  document.getElementById('feedbackModal').style.display='none';
-}
-function setStar(s){
-  starScore = s;
-  document.querySelectorAll('#stars span').forEach((el,i)=>{
-    el.classList.toggle('active',i<s);
-  });
-}
-function submitFeedback(){
-  if(starScore === 0){
-    alert('请先选择星级评分~');
-    return;
+
+// 随机抽取数组中的n个元素
+function getRandomItems(arr, n) {
+  let shuffled = arr.slice();
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
-  let content = document.getElementById('feedbackInput').value;
-  console.log("用户反馈提交：", {
-    score: starScore,
-    content: content,
-    time: new Date().toLocaleString()
-  });
-  alert("反馈提交成功！\n感谢您的使用与建议");
-  closeFeedback();
+  return shuffled.slice(0, n);
 }
 
-function init(){
-  const box = document.getElementById('cards');
-  box.innerHTML = '';
-  algos.forEach((a,i)=>{
-    results[a.name] = {time:0,cmp:0,swp:0};
-    box.innerHTML += `
-    <div class="card">
-      <h3 onclick="openPrincipleModal('${a.name}')">${a.name}</h3>
-      <div class="info">最好:${a.best} 平均:${a.avg} 最坏:${a.worst} 空间:${a.space}</div>
-      <div class="info">耗时:<span id="t${i}">0</span>s 比较:<span id="c${i}">0</span> 交换:<span id="s${i}">0</span></div>
-      <div class="log" id="log${i}">等待开始...</div>
-      <canvas id="cv${i}"></canvas>
+// ==================== 个性化主题相关 ====================
+function applyUserTheme() {
+  let theme = JSON.parse(localStorage.getItem("user_theme"));
+  document.documentElement.style.setProperty('--primary-bg', theme.bg);
+  document.documentElement.style.setProperty('--panel-bg', theme.panelBg);
+  document.documentElement.style.setProperty('--text-color', theme.textColor);
+  document.documentElement.style.setProperty('--primary-btn', theme.btnColor);
+  
+  let screensDiv = document.getElementById("screens");
+  if(theme.layout === "list") {
+    screensDiv.style.gridTemplateColumns = "1fr";
+  } else {
+    screensDiv.style.gridTemplateColumns = "repeat(2,1fr)";
+  }
+}
+
+function changeTheme(bg, panelBg, textColor, btnColor, layout) {
+  let theme = JSON.parse(localStorage.getItem("user_theme"));
+  if(bg) theme.bg = bg;
+  if(panelBg) theme.panelBg = panelBg;
+  if(textColor) theme.textColor = textColor;
+  if(btnColor) theme.btnColor = btnColor;
+  if(layout) theme.layout = layout;
+  
+  localStorage.setItem("user_theme", JSON.stringify(theme));
+  applyUserTheme();
+}
+
+// ==================== 可视化初始化 ====================
+function initScreens() {
+  let wrap = document.getElementById("screens");
+  wrap.innerHTML = "";
+  screens = [];
+  
+  algoList.forEach((al, idx) => {
+    let div = document.createElement("div");
+    div.className = "screen";
+    div.innerHTML = `
+      <div class="algo-label">${al.name}</div>
+      <div class="info-text" id="tip${idx}">等待...</div>
+      <div class="bar-box" id="scr${idx}"></div>
+    `;
+    wrap.appendChild(div);
+    
+    screens.push({
+      bar: document.getElementById(`scr${idx}`),
+      tip: document.getElementById(`tip${idx}`)
+    });
+  });
+}
+
+function initAlgoCards() {
+  let wrap = document.getElementById("algoCards");
+  wrap.innerHTML = "";
+  algoList.forEach(al => {
+    let card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = algoIntro[al.key];
+    wrap.appendChild(card);
+  });
+}
+
+function getDelay() {
+  let rate = parseFloat(document.getElementById("speedSelect").value);
+  return baseDelay / rate;
+}
+
+function draw(arr, idx, actA = -1, actB = -1) {
+  let box = screens[idx].bar;
+  box.innerHTML = "";
+  
+  if (!arr || arr.length === 0) return;
+  
+  let max = Math.max(...arr);
+  arr.forEach((v, i) => {
+    let bar = document.createElement("div");
+    bar.className = "bar";
+    bar.style.height = (v / max * 100) + "%";
+    bar.style.background = algoList[idx].color;
+    if (i === actA || i === actB) bar.style.background = "#dc3545";
+    box.appendChild(bar);
+  });
+}
+
+function genRandom() {
+  let len = Math.floor(Math.random() * 20) + 20;
+  arrOrigin = Array.from({ length: len }, () => Math.floor(Math.random() * 150) + 20);
+  resetDraw();
+  addLog("随机数组长度:" + len);
+}
+
+function openCustom() { 
+  document.getElementById("customModal").style.display = "flex"; 
+}
+
+function setCustom() {
+  let val = document.getElementById("customArr").value;
+  let arr = val.split(",").map(Number).filter(x => !isNaN(x));
+  if (arr.length < 3) { alert("至少3个数字"); return; }
+  arrOrigin = arr;
+  resetDraw();
+  closeModal("customModal");
+}
+
+function resetDraw() {
+  arrList = algoList.map((_, i) => [...arrOrigin]);
+  stats = [];
+  drawAll();
+  screens.forEach((s, i) => {
+    s.tip.innerText = algoList[i].name + ": 就绪";
+  });
+}
+
+function drawAll() { 
+  arrList.forEach((arr, i) => draw(arr, i)); 
+}
+
+// ==================== 排序算法实现 ====================
+async function bubble(arr, idx) {
+  let t = performance.now(), cmp = 0, swp = 0, n = arr.length;
+  let tip = screens[idx].tip;
+  
+  for (let i = 0; i < n - 1; i++) {
+    for (let j = 0; j < n - i - 1; j++) {
+      if (stopFlag) return;
+      cmp++;
+      tip.innerText = `比较 ${arr[j]} ↔ ${arr[j + 1]}`;
+      draw(arr, idx, j, j + 1);
+      await sleep(getDelay());
+      
+      if (arr[j] > arr[j + 1]) {
+        swp++;
+        tip.innerText = `交换 ${arr[j]} ↔ ${arr[j + 1]}`;
+        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+        draw(arr, idx, j, j + 1);
+        await sleep(getDelay());
+      }
+    }
+  }
+  
+  tip.innerText = "完成";
+  return { name: algoList[idx].name, time: (performance.now() - t) / 1000, cmp, swp };
+}
+
+async function select(arr, idx) {
+  let t = performance.now(), cmp = 0, swp = 0, n = arr.length;
+  let tip = screens[idx].tip;
+  
+  for (let i = 0; i < n - 1; i++) {
+    let m = i;
+    for (let j = i + 1; j < n; j++) {
+      if (stopFlag) return;
+      cmp++;
+      tip.innerText = `比较 ${arr[j]} ↔ ${arr[m]}`;
+      draw(arr, idx, m, j);
+      await sleep(getDelay());
+      if (arr[j] < arr[m]) m = j;
+    }
+    
+    if (m !== i) {
+      swp++;
+      tip.innerText = `交换 ${arr[i]} ↔ ${arr[m]}`;
+      [arr[i], arr[m]] = [arr[m], arr[i]];
+      draw(arr, idx, i, m);
+      await sleep(getDelay());
+    }
+  }
+  
+  tip.innerText = "完成";
+  return { name: algoList[idx].name, time: (performance.now() - t) / 1000, cmp, swp };
+}
+
+async function insert(arr, idx) {
+  let t = performance.now(), cmp = 0, swp = 0, n = arr.length;
+  let tip = screens[idx].tip;
+  
+  for (let i = 1; i < n; i++) {
+    let k = arr[i], j = i - 1;
+    while (j >= 0 && arr[j] > k) {
+      if (stopFlag) return;
+      cmp++;
+      tip.innerText = `比较 ${arr[j]} ↔ ${k}`;
+      draw(arr, idx, j);
+      arr[j + 1] = arr[j];
+      j--;
+      swp++;
+      await sleep(getDelay());
+    }
+    arr[j + 1] = k;
+    draw(arr, idx, i);
+    await sleep(getDelay());
+  }
+  
+  tip.innerText = "完成";
+  return { name: algoList[idx].name, time: (performance.now() - t) / 1000, cmp, swp };
+}
+
+async function shell(arr, idx) {
+  let t = performance.now(), cmp = 0, swp = 0, n = arr.length, gap = n >> 1;
+  let tip = screens[idx].tip;
+  
+  while (gap > 0) {
+    for (let i = gap; i < n; i++) {
+      let k = arr[i], j = i;
+      while (j >= gap && arr[j - gap] > k) {
+        if (stopFlag) return;
+        cmp++;
+        tip.innerText = `比较 ${arr[j - gap]} ↔ ${k}`;
+        arr[j] = arr[j - gap];
+        j -= gap;
+        swp++;
+        await sleep(getDelay());
+      }
+      arr[j] = k;
+      draw(arr, idx, i);
+      await sleep(getDelay());
+    }
+    gap >>= 1;
+  }
+  
+  tip.innerText = "完成";
+  return { name: algoList[idx].name, time: (performance.now() - t) / 1000, cmp, swp };
+}
+
+async function merge(arr, idx) {
+  let t = performance.now(), cmp = 0;
+  let tip = screens[idx].tip;
+  
+  async function ms(l, r) {
+    if (l >= r || stopFlag) return;
+    let m = (l + r) >> 1;
+    await ms(l, m);
+    await ms(m + 1, r);
+    
+    let a = [], i = l, j = m + 1;
+    while (i <= m && j <= r) {
+      if (stopFlag) return;
+      cmp++;
+      tip.innerText = `比较 ${arr[i]} ↔ ${arr[j]}`;
+      a.push(arr[i] < arr[j] ? arr[i++] : arr[j++]);
+      draw(arr, idx, i, j);
+      await sleep(getDelay() * 0.5);
+    }
+    
+    while (i <= m) a.push(arr[i++]);
+    while (j <= r) a.push(arr[j++]);
+    
+    for (let p = l; p <= r; p++) {
+      arr[p] = a[p - l];
+      draw(arr, idx, p);
+      await sleep(getDelay() * 0.3);
+    }
+  }
+  
+  await ms(0, arr.length - 1);
+  tip.innerText = "完成";
+  return { name: algoList[idx].name, time: (performance.now() - t) / 1000, cmp, swp: 0 };
+}
+
+async function quick(arr, idx) {
+  let t = performance.now(), cmp = 0, swp = 0;
+  let tip = screens[idx].tip;
+  
+  async function qs(l, r) {
+    if (l >= r || stopFlag) return;
+    let p = arr[l], i = l, j = r;
+    
+    while (i < j) {
+      while (arr[j] >= p && i < j) {
+        if (stopFlag) return;
+        cmp++;
+        tip.innerText = `比较 ${arr[j]} ↔ ${p}`;
+        j--;
+        draw(arr, idx, j);
+        await sleep(getDelay() * 0.5);
+      }
+      
+      while (arr[i] <= p && i < j) {
+        if (stopFlag) return;
+        cmp++;
+        tip.innerText = `比较 ${arr[i]} ↔ ${p}`;
+        i++;
+        draw(arr, idx, i);
+        await sleep(getDelay() * 0.5);
+      }
+      
+      if (i < j) {
+        swp++;
+        tip.innerText = `交换 ${arr[i]} ↔ ${arr[j]}`;
+        draw(arr, idx, i, j);
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+        await sleep(getDelay());
+      }
+    }
+    
+    arr[l] = arr[i];
+    arr[i] = p;
+    draw(arr, idx, i);
+    await qs(l, i - 1);
+    await qs(i + 1, r);
+  }
+  
+  await qs(0, arr.length - 1);
+  tip.innerText = "完成";
+  return { name: algoList[idx].name, time: (performance.now() - t) / 1000, cmp, swp };
+}
+
+async function startAll() {
+  if (running) return;
+  running = true;
+  stopFlag = false;
+  resetDraw();
+  
+  let tasks = [
+    bubble([...arrList[0]], 0),
+    select([...arrList[1]], 1),
+    insert([...arrList[2]], 2),
+    shell([...arrList[3]], 3),
+    merge([...arrList[4]], 4),
+    quick([...arrList[5]], 5)
+  ];
+  
+  stats = await Promise.all(tasks);
+  addLog("6路排序全部完成");
+  running = false;
+}
+
+function stopAll() {
+  stopFlag = true;
+  running = false;
+  screens.forEach(s => s.tip.innerText = "已停止");
+}
+
+// ==================== 图表功能 ====================
+function showCharts() {
+  if (!stats.length) return alert("请先运行排序");
+  
+  let ctx1 = document.getElementById("chartTime").getContext("2d");
+  let ctx2 = document.getElementById("chartCompare").getContext("2d");
+  let ctx3 = document.getElementById("chartRadar").getContext("2d");
+  
+  let names = stats.map(s => s.name);
+  let times = stats.map(s => s.time);
+  let cmps = stats.map(s => s.cmp);
+  let swps = stats.map(s => s.swp);
+  
+  if (window.ch1) window.ch1.destroy();
+  if (window.ch2) window.ch2.destroy();
+  if (window.ch3) window.ch3.destroy();
+  
+  window.ch1 = new Chart(ctx1, {
+    type: "bar",
+    data: {
+      labels: names,
+      datasets: [{ label: "耗时(秒)", data: times, backgroundColor: "#4169E1" }]
+    }
+  });
+  
+  window.ch2 = new Chart(ctx2, {
+    type: "bar",
+    data: {
+      labels: names,
+      datasets: [
+        { label: "比较次数", data: cmps },
+        { label: "交换次数", data: swps }
+      ]
+    }
+  });
+  
+  window.ch3 = new Chart(ctx3, {
+    type: "radar",
+    data: {
+      labels: names,
+      datasets: [{ label: "效率", data: times.map(x => 1 / x) }]
+    }
+  });
+  
+  document.getElementById("chartModal").style.display = "flex";
+}
+
+// ==================== 优化后的练习/考试功能 ====================
+function renderPaper(questions, mode) {
+  let html = "";
+  let totalScore = 0;
+  
+  const difficultyNames = { easy: "基础题", medium: "进阶题", hard: "高级题", original: "原创题" };
+  const difficulties = ["easy", "medium", "hard", "original"];
+  
+  difficulties.forEach(diff => {
+    const diffQuestions = questions.filter(q => q.difficulty === diff);
+    if (diffQuestions.length === 0) return;
+    
+    html += `<div style="margin:20px 0 10px;padding-bottom:8px;border-bottom:2px solid #eee">
+      <h4 style="color:#333">${difficultyNames[diff]} <span style="font-size:14px;color:#666">(${diffQuestions.length}题)</span></h4>
+    </div>`;
+    
+    diffQuestions.forEach((q, idx) => {
+      totalScore += q.score;
+      const qNum = questions.indexOf(q) + 1;
+      
+      html += `<div class="question">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div>
+            <span class="type-tag">${q.type}</span>
+            <strong>${qNum}. ${q.q}</strong>
+          </div>
+          <div>
+            <span class="difficulty-tag difficulty-${q.difficulty}">${difficultyNames[diff]}</span>
+            <span style="font-weight:bold;color:#4169E1">${q.score}分</span>
+          </div>
+        </div>`;
+      
+      if (q.type === "单选") {
+        q.opts.forEach(o => {
+          html += `<div class="option"><label><input type="radio" name="${mode}${qNum}" value="${o}"> ${o}</label></div>`;
+        });
+      }
+      
+      if (q.type === "多选") {
+        q.opts.forEach(o => {
+          html += `<div class="option"><label><input type="checkbox" name="${mode}${qNum}" value="${o}"> ${o}</label></div>`;
+        });
+      }
+      
+      if (q.type === "判断") {
+        html += `<div class="option">
+          <label><input type="radio" name="${mode}${qNum}" value="true"> 对</label>
+          <label><input type="radio" name="${mode}${qNum}" value="false"> 错</label>
+        </div>`;
+      }
+      
+      if (q.type === "程序") {
+        html += `<div><textarea rows="3" name="${mode}${qNum}" placeholder="请输入代码..."></textarea></div>`;
+      }
+      
+      html += '</div>';
+    });
+  });
+  
+  document.getElementById(mode === "exam" ? "examArea" : "practiceArea").innerHTML = html;
+  
+  const inputs = document.querySelectorAll(`#${mode === "exam" ? "examArea" : "practiceArea"} input, textarea`);
+  inputs.forEach(input => {
+    input.addEventListener("change", () => updateProgress(questions, mode));
+  });
+}
+
+function updateProgress(questions, mode) {
+  let answered = 0;
+  
+  questions.forEach((q, idx) => {
+    const qNum = idx + 1;
+    let answeredThis = false;
+    
+    if (q.type === "单选" || q.type === "判断") {
+      answeredThis = document.querySelector(`input[name="${mode}${qNum}"]:checked`) !== null;
+    } else if (q.type === "多选") {
+      answeredThis = document.querySelectorAll(`input[name="${mode}${qNum}"]:checked`).length > 0;
+    } else if (q.type === "程序") {
+      answeredThis = document.querySelector(`textarea[name="${mode}${qNum}"]`).value.trim().length > 0;
+    }
+    
+    if (answeredThis) answered++;
+  });
+  
+  const progress = (answered / questions.length) * 100;
+  const progressBar = mode === "exam" ? "examProgress" : "practiceProgress";
+  document.getElementById(progressBar).style.width = `${progress}%`;
+}
+
+function grade(questions, mode) {
+  let sc = 0;
+  let details = [];
+  
+  questions.forEach((q, idx) => {
+    const qNum = idx + 1;
+    let v;
+    let ok = false;
+    
+    if (q.type === "单选") {
+      v = document.querySelector(`input[name="${mode}${qNum}"]:checked`)?.value || "";
+      ok = v === q.ans;
+    }
+    
+    if (q.type === "多选") {
+      v = [...document.querySelectorAll(`input[name="${mode}${qNum}"]:checked`)].map(x => x.value);
+      ok = JSON.stringify(v.sort()) === JSON.stringify(q.ans.sort());
+    }
+    
+    if (q.type === "判断") {
+      v = document.querySelector(`input[name="${mode}${qNum}"]:checked`)?.value === "true";
+      ok = v === q.ans;
+    }
+    
+    if (q.type === "程序") {
+      v = document.querySelector(`textarea[name="${mode}${qNum}"]`).value.trim();
+      ok = q.ans.split(" ").some(keyword => v.includes(keyword)) && v.length > 10;
+    }
+    
+    if (ok) {
+      sc += q.score;
+      details.push({ q: q.q, correct: true, score: q.score });
+    } else {
+      details.push({ q: q.q, correct: false, score: 0 });
+    }
+  });
+  
+  return { score: sc, details: details };
+}
+
+function openPractice() {
+  // 练习：只抽取基础题 (难度: easy)
+  currentPracticeQuestions = getRandomItems(questionBank.easy, 4);
+  currentPracticeQuestions.forEach(q => q.difficulty = "easy");
+  
+  renderPaper(currentPracticeQuestions, "practice");
+  document.getElementById("practiceModal").style.display = "flex";
+}
+
+function submitPractice() {
+  const result = grade(currentPracticeQuestions, "practice");
+  let detailMsg = "答题详情:\n";
+  result.details.forEach((d, i) => {
+    detailMsg += `${i+1}. ${d.q.substring(0, 20)}... ${d.correct ? "✓" : "✗"} (${d.score}分)\n`;
+  });
+  
+  alert(`练习得分: ${result.score}\n\n${detailMsg}`);
+  closeModal("practiceModal");
+}
+
+function openExam() {
+  // 考试：抽取高级题(2) + 基础题(2) + 进阶题(2) + 原创题(1)
+  let hardQ = getRandomItems(questionBank.hard, 2).map(q => ({...q, difficulty: "hard"}));
+  let easyQ = getRandomItems(questionBank.easy, 2).map(q => ({...q, difficulty: "easy"}));
+  let mediumQ = getRandomItems(questionBank.medium, 2).map(q => ({...q, difficulty: "medium"}));
+  let originalQ = getRandomItems(questionBank.original, 1).map(q => ({...q, difficulty: "original"}));
+  
+  currentExamQuestions = [...hardQ, ...easyQ, ...mediumQ, ...originalQ];
+  
+  renderPaper(currentExamQuestions, "exam");
+  document.getElementById("examModal").style.display = "flex";
+}
+
+function submitExam() {
+  const result = grade(currentExamQuestions, "exam");
+  saveExam(result.score);
+  
+  let detailHtml = "<div style='max-height:300px;overflow-y:auto;margin:10px 0'>";
+  result.details.forEach((d, i) => {
+    detailHtml += `<div style="padding:6px;margin:4px;background:${d.correct?'#d4edda':'#f8d7da'};border-radius:4px">
+      <strong>${i+1}.</strong> ${d.q.substring(0, 30)}... <span style="color:${d.correct?'#155724':'#721c24'}">${d.correct?'正确':'错误'}</span>
     </div>`;
   });
-  gen();
+  detailHtml += "</div>";
+  
+  const modal = document.createElement("div");
+  modal.className = "modal";
+  modal.style.display = "flex";
+  modal.innerHTML = `
+    <div class="modal-body">
+      <h3>考试结果</h3>
+      <div style="text-align:center;padding:20px">
+        <div style="font-size:48px;color:#4169E1;font-weight:bold">${result.score}</div>
+        <div style="font-size:18px;color:#666">总分: ${currentExamQuestions.reduce((a,b)=>a+b.score,0)}</div>
+      </div>
+      ${detailHtml}
+      <button class="btn" onclick="this.parentElement.parentElement.style.display='none'">关闭</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  
+  closeModal("examModal");
 }
 
-function openPrincipleModal(algoName){
-  const algo = algos.find(a => a.name === algoName);
-  document.getElementById('principleTitle').textContent = algo.name + " 详细原理";
-  document.getElementById('principleContent').textContent = algo.principle;
-  document.getElementById('principleModal').style.display = 'flex';
-}
-function closePrincipleModal(){document.getElementById('principleModal').style.display='none'}
-
-function openCustomModal(){
-  customData = []; updateCustomList();
-  document.getElementById('customModal').style.display='flex';
-}
-function closeCustomModal(){document.getElementById('customModal').style.display='none'}
-function addCustomData(){
-  const num = +document.getElementById('customDataInput').value.trim();
-  if(!isNaN(num) && num>0 && num<200){
-    customData.push(num); updateCustomList();
-  }
-}
-function clearCustomData(){customData=[]; updateCustomList();}
-function updateCustomList(){
-  document.getElementById('customDataList').textContent = 
-    customData.length ? "当前数据："+customData.join(', ') : "当前数据：无";
-}
-function confirmCustomData(){
-  if(customData.length<2){alert('至少需要2个数据才能排序');return;}
-  document.getElementById('dataInput').value = customData.join(',');
-  origin = [...customData]; redrawAll(); closeCustomModal();
+// ==================== 用户反馈功能 ====================
+function setStar(s) {
+  star = s;
+  document.querySelectorAll(".star").forEach((e, i) => e.classList.toggle("on", i < s));
 }
 
-function getData(){
-  const val = document.getElementById('dataInput').value.trim();
-  return val ? val.split(',').map(Number).filter(x=>!isNaN(x)&&x>0) : null;
+function openFeedback() {
+  document.getElementById("feedbackModal").style.display = "flex";
 }
-function gen(){
-  stopAll();
-  const n = Math.max(2,Math.min(80,+document.getElementById('size').value||8));
-  const arr = Array.from({length:n},()=>Math.floor(Math.random()*96)+4);
-  document.getElementById('dataInput').value = arr.join(',');
-  origin = [...arr]; redrawAll();
-}
-function redrawAll(){
-  const data = getData()||[];
-  algos.forEach((_,i)=>draw(i,data,[],'就绪'));
-}
-function draw(idx,arr,high,msg){
-  const cv = document.getElementById(`cv${idx}`);
-  if(!cv) return;
-  const ctx = cv.getContext('2d');
-  const w = cv.width, h = cv.height;
-  ctx.clearRect(0,0,w,h);
-  if(!arr.length) return;
-  const max = Math.max(...arr);
-  const barW = w / arr.length;
-  arr.forEach((val,i)=>{
-    const barH = h * (val/max);
-    ctx.fillStyle = high.includes(i) ? '#ff7f0e' : getComputedStyle(document.documentElement).getPropertyValue('--theme');
-    ctx.fillRect(i*barW, h-barH, barW-1, barH);
+
+function submitFeedback() {
+  if (!star) return alert("请评分");
+  
+  let txt = document.getElementById("feedText").value.trim();
+  if (!txt) return alert("请输入反馈内容");
+  
+  let feedbacks = JSON.parse(localStorage.getItem("all_feedbacks") || "[]");
+  feedbacks.push({
+    user: user,
+    star: star,
+    text: txt,
+    time: new Date().toLocaleString('zh-CN')
   });
-  const log = document.getElementById(`log${idx}`);
-  if(log) log.textContent = msg;
+  
+  localStorage.setItem("all_feedbacks", JSON.stringify(feedbacks));
+  alert("反馈提交成功！");
+  closeModal("feedbackModal");
 }
 
-function finish(idx,name,time,cmp,swp){
-  results[name] = {time,cmp,swp};
-  document.getElementById(`t${idx}`).textContent = time.toFixed(2);
-  document.getElementById(`c${idx}`).textContent = cmp;
-  document.getElementById(`s${idx}`).textContent = swp;
-  const cv = document.getElementById(`cv${idx}`);
-  const ctx = cv.getContext('2d');
-  const w = cv.width, h = cv.height;
-  ctx.clearRect(0,0,w,h);
-  const max = Math.max(...origin);
-  const barW = w/origin.length;
-  origin.forEach((val,i)=>{
-    const barH = h*(val/max);
-    ctx.fillStyle = '#52c41a';
-    ctx.fillRect(i*barW,h-barH,barW-1,barH);
-  });
-  document.getElementById(`log${idx}`).textContent = '排序完成';
+// ==================== AI助手功能(重构) ====================
+let aiGreeted = false;
+
+function openAI() {
+  document.getElementById("aiModal").style.display = "flex";
+  
+  // 首次进入播报功能菜单
+  if (!aiGreeted) {
+    aiGreeted = true;
+    const menuHtml = `
+      <div class="ai-menu">
+        👋 你好！我是你的个性化AI助手。我不仅可以回答算法问题，还能帮你改变界面风格！<br><br>
+        请输入数字选择功能：<br>
+        <b>1. 暗黑模式</b> (护眼黑底色)<br>
+        <b>2. 温暖模式</b> (暖黄护眼色)<br>
+        <b>3. 赛博朋克</b> (科技蓝紫色调)<br>
+        <b>4. 粉红佳人</b> (甜美粉色调)<br>
+        <b>5. 切换列表布局</b> (单列/双列切换)<br>
+        <b>6. 恢复默认主题</b> <br><br>
+        或者直接输入算法名称(如"冒泡")提问算法相关问题！
+      </div>
+    `;
+    document.getElementById("aiMenuContainer").innerHTML = menuHtml;
+    document.getElementById("aiReply").innerText = "请输入功能编号或问题...";
+  }
 }
 
-async function startAll(){
-  stopAll();
-  let arr = getData();
-  if(!arr || arr.length<2){gen();arr=getData();}
-  origin = [...arr]; running = true;
-  const delay = Math.max(50,+document.getElementById('delay').value||700);
-  algos.forEach((a,i)=>{
-    const task = {stop:false};
-    tasks.push(task);
-    run(i,a,[...arr],task,delay);
-  });
-}
-function stopAll(){
-  running = false;
-  tasks.forEach(t=>t.stop=true);
-  tasks = [];
-}
-async function run(idx,algo,arr,task,delay){
-  const startTime = performance.now();
-  const stat = {cmp:0,swp:0};
-  try{
-    await algo.sort(arr,stat,task,async (high,msg)=>{
-      if(task.stop) throw 'stop';
-      draw(idx,arr,high,msg);
-      await new Promise(res=>setTimeout(res,delay));
-    });
-  }catch(e){}
-  const useTime = (performance.now()-startTime)/1000;
-  finish(idx,algo.name,useTime,stat.cmp,stat.swp);
+function askAI() {
+  let q = document.getElementById("askAI").value.trim();
+  let a = "";
+  
+  // 优先识别数字指令
+  if (q === "1") {
+    changeTheme("#1e1e1e", "#2d2d2d", "#d4d4d4", "#007acc", null);
+    a = "✅ 已为您切换为【暗黑模式】！";
+  } else if (q === "2") {
+    changeTheme("#f5f0e1", "#fff8e7", "#5b4636", "#d4a017", null);
+    a = "✅ 已为您切换为【温暖模式】！";
+  } else if (q === "3") {
+    changeTheme("#0d0221", "#150734", "#00ffcc", "#bd00ff", null);
+    a = "✅ 已为您切换为【赛博朋克】风格！";
+  } else if (q === "4") {
+    changeTheme("#fff0f5", "#ffe4e1", "#d63384", "#e75480", null);
+    a = "✅ 已为您切换为【粉红佳人】风格！";
+  } else if (q === "5") {
+    let currentLayout = JSON.parse(localStorage.getItem("user_theme")).layout;
+    let newLayout = currentLayout === "grid" ? "list" : "grid";
+    changeTheme(null, null, null, null, newLayout);
+    a = `✅ 布局已切换为【${newLayout === 'list' ? '单列列表' : '双列网格'}】模式！`;
+  } else if (q === "6") {
+    changeTheme("#f7f9fc", "#fff", "#222", "#4169E1", "grid");
+    a = "✅ 已恢复默认主题与布局！";
+  } 
+  // 算法问题识别
+  else {
+    q = q.toLowerCase();
+    if (/冒泡/.test(q)) a = "冒泡排序：时间复杂度 O(n²)，空间复杂度 O(1)，稳定排序。原理：重复比较相邻元素，如果顺序错误就交换，每轮将最大元素移到末尾。";
+    else if (/选择/.test(q)) a = "选择排序：时间复杂度 O(n²)，空间复杂度 O(1)，不稳定。原理：每轮选择最小元素放到已排序序列的末尾。";
+    else if (/插入/.test(q)) a = "插入排序：时间复杂度 O(n²)，空间复杂度 O(1)，稳定。原理：将未排序元素插入到已排序序列的适当位置。";
+    else if (/希尔/.test(q)) a = "希尔排序：时间复杂度 O(n log n)，空间复杂度 O(1)，不稳定。原理：是插入排序的改进，通过分组和缩小增量来提高效率。";
+    else if (/归并/.test(q)) a = "归并排序：时间复杂度 O(n log n)，空间复杂度 O(n)，稳定。原理：分治算法，先递归分解数组，再合并有序数组。";
+    else if (/快排/.test(q)) a = "快速排序：平均 O(n log n)，最坏 O(n²)，空间 O(log n)，不稳定。原理：选择基准，分区，递归排序左右两部分。";
+    else a = "🤔 抱歉，我没有理解。您可以输入功能编号(1-6)改变界面，或者输入排序算法名称(如'冒泡')了解算法知识。";
+  }
+  
+  document.getElementById("aiReply").innerText = a;
 }
 
-function showChart(){
-  const names = [], timeArr = [], cmpArr = [], swpArr = [];
-  algos.forEach(a=>{
-    names.push(a.name);
-    timeArr.push(results[a.name].time);
-    cmpArr.push(results[a.name].cmp);
-    swpArr.push(results[a.name].swp);
-  });
-  document.getElementById('chartPanel').style.display = 'block';
-  const ctx = document.getElementById('compareCanvas').getContext('2d');
-  if(window.chart) window.chart.destroy();
-  const type = document.getElementById('chartType').value;
-  window.chart = new Chart(ctx,{
-    type:type,
-    data:{
-      labels:names,
-      datasets:[
-        {label:"耗时(s)",data:timeArr,backgroundColor:"#409eff",borderColor:"#409eff",fill:false},
-        {label:"比较次数",data:cmpArr,backgroundColor:"#ff7f0e",borderColor:"#ff7f0e",fill:false},
-        {label:"交换次数",data:swpArr,backgroundColor:"#52c41a",borderColor:"#52c41a",fill:false}
-      ]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      scales: type!=='radar' ? {y:{beginAtZero:true}} : {}
-    }
-  });
-}
-
-async function bubble(arr,stat,task,draw){
-  const n = arr.length;
-  for(let i=0;i<n;i++){
-    for(let j=0;j<n-i-1;j++){
-      stat.cmp++;
-      await draw([j,j+1],`比较 ${arr[j]} ↔ ${arr[j+1]}`);
-      if(arr[j]>arr[j+1]){
-        [arr[j],arr[j+1]] = [arr[j+1],arr[j]];
-        stat.swp++;
-        await draw([j,j+1],'交换位置');
-      }
-      if(task.stop) return;
-    }
-  }
-}
-async function select(arr,stat,task,draw){
-  const n = arr.length;
-  for(let i=0;i<n;i++){
-    let minIdx = i;
-    for(let j=i+1;j<n;j++){
-      stat.cmp++;
-      await draw([j,minIdx],'查找最小值');
-      if(arr[j]<arr[minIdx]) minIdx = j;
-      if(task.stop) return;
-    }
-    [arr[i],arr[minIdx]] = [arr[minIdx],arr[i]];
-    stat.swp++;
-    await draw([i,minIdx],'交换最小值');
-  }
-}
-async function insert(arr,stat,task,draw){
-  const n = arr.length;
-  for(let i=1;i<n;i++){
-    const key = arr[i];
-    let j = i-1;
-    await draw([j,i],`准备插入 ${key}`);
-    while(j>=0 && key<arr[j]){
-      stat.cmp++;
-      arr[j+1] = arr[j];
-      stat.swp++;
-      await draw([j,j+1],'元素后移');
-      j--;
-      if(task.stop) return;
-    }
-    arr[j+1] = key;
-  }
-}
-async function quick(arr,stat,task,draw,l=0,r=null){
-  if(r===null) r = arr.length-1;
-  if(l>=r || task.stop) return;
-  let i=l, j=r, pivot=arr[l];
-  await draw([l],`基准值：${pivot}`);
-  while(i<=j){
-    while(i<=j && arr[i]<pivot){stat.cmp++;i++;await draw([i],'右移');if(task.stop)return}
-    while(i<=j && arr[j]>pivot){stat.cmp++;j--;await draw([j],'左移');if(task.stop)return}
-    if(i<=j){
-      [arr[i],arr[j]] = [arr[j],arr[i]];
-      stat.swp++;
-      await draw([i,j],'分区交换');
-      i++;j--;
-    }
-  }
-  await quick(arr,stat,task,draw,l,j);
-  await quick(arr,stat,task,draw,i,r);
-}
-async function merge(arr,stat,task,draw,l=0,r=null){
-  if(r===null) r = arr.length-1;
-  if(l>=r || task.stop) return;
-  const mid = Math.floor((l+r)/2);
-  await merge(arr,stat,task,draw,l,mid);
-  await merge(arr,stat,task,draw,mid+1,r);
-  const temp = [], i=l, j=mid+1;
-  while(i<=mid && j<=r){stat.cmp++;temp.push(arr[i]<=arr[j]?arr[i++]:arr[j++])}
-  while(i<=mid) temp.push(arr[i++]);
-  while(j<=r) temp.push(arr[j++]);
-  for(let k=0;k<temp.length;k++){
-    arr[l+k] = temp[k];
-    stat.swp++;
-    await draw([l+k],'归并元素');
-    if(task.stop) return;
-  }
-}
-async function shell(arr,stat,task,draw){
-  const n = arr.length;
-  for(let gap=n>>1;gap>0;gap>>=1){
-    for(let i=gap;i<n;i++){
-      const key = arr[i];
-      let j = i;
-      while(j>=gap && arr[j-gap]>key){
-        stat.cmp++;
-        arr[j] = arr[j-gap];
-        stat.swp++;
-        await draw([j-gap,j],'分组交换');
-        j -= gap;
-        if(task.stop) return;
-      }
-      arr[j] = key;
+// ==================== 学习记录功能 ====================
+function loadRecord() {
+  let now = new Date().toLocaleString();
+  localStorage.setItem("last", now);
+  
+  let ex = JSON.parse(localStorage.getItem("exams") || "[]");
+  if (ex.length >= 2) {
+    let last = ex[ex.length - 1].score;
+    let pre = ex[ex.length - 2].score;
+    if (last > pre && pre > 0) {
+      let div = document.createElement("div");
+      div.className = "congrats";
+      div.innerText = `🎉 进步啦! ${pre} → ${last}`;
+      document.body.appendChild(div);
+      setTimeout(() => div.remove(), 3000);
     }
   }
 }
 
-window.onload = init;
+function saveExam(s) {
+  let ex = JSON.parse(localStorage.getItem("exams") || "[]");
+  ex.push({ score: s, time: new Date().toLocaleString() });
+  localStorage.setItem("exams", JSON.stringify(ex));
+  loadRecord();
+  refreshUserPanel();
+}
+
+function refreshUserPanel() {
+  let ex = JSON.parse(localStorage.getItem("exams") || "[]");
+  let last = ex.length ? ex[ex.length - 1].score : "无";
+  userInfo.innerText = `👤 用户: ${user} | 📝 最近成绩: ${last}`;
+  recordInfo.innerText = `🕒 上次访问: ${localStorage.getItem("last") || "无"}`;
+}
+
+function openRecord() {
+  let ex = JSON.parse(localStorage.getItem("exams") || "[]");
+  recordList.innerHTML = ex.length ? 
+    ex.map(e => `<div class="rank-item"><span>${e.time}</span><span>${e.score}分</span></div>`).join("") 
+    : "<p>暂无考试记录</p>";
+  document.getElementById("recordModal").style.display = "flex";
+}
+
+function addLog(s) {
+  log.innerHTML += `<div class="log">${new Date().toLocaleString()} ${s}</div>`;
+  log.scrollTop = log.scrollHeight;
+}
+
+function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
+// =============================================================================
+// 🔐 管理员后台相关功能
+// =============================================================================
+
+function openAdminLogin() {
+  document.getElementById("adminLoginModal").style.display = "flex";
+  document.getElementById("adminPassword").focus();
+}
+
+function checkAdminPassword() {
+  const inputPwd = document.getElementById("adminPassword").value;
+  const savedPwd = localStorage.getItem("admin_password") || "admin123";
+  
+  if (inputPwd === savedPwd) {
+    closeModal("adminLoginModal");
+    openAdminBackend();
+  } else {
+    alert("❌ 密码错误！");
+  }
+}
+
+function changeAdminMode() {
+  isChangingPwd = true;
+  closeModal("adminLoginModal");
+  openChangePassword();
+}
+
+function openChangePassword() {
+  document.getElementById("changePwdModal").style.display = "flex";
+}
+
+function cancelChangePwd() {
+  document.getElementById("changePwdModal").style.display = "none";
+  setTimeout(() => openAdminLogin(), 200);
+}
+
+function updateAdminPassword() {
+  const oldPwd = document.getElementById("oldPwdInput").value;
+  const newPwd = document.getElementById("newPwdInput").value;
+  const confirmPwd = document.getElementById("confirmPwdInput").value;
+  
+  const currentPwd = localStorage.getItem("admin_password") || "admin123";
+  
+  if (oldPwd !== currentPwd) {
+    alert("❌ 原密码不正确");
+    return;
+  }
+  
+  if (newPwd.length < 6) {
+    alert("❌ 新密码至少6位");
+    return;
+  }
+  
+  if (newPwd !== confirmPwd) {
+    alert("❌ 两次输入的新密码不一致");
+    return;
+  }
+  
+  localStorage.setItem("admin_password", newPwd);
+  alert("✅ 密码修改成功！");
+  closeModal("changePwdModal");
+  
+  if (isChangingPwd) {
+    setTimeout(() => openAdminLogin(), 500);
+    isChangingPwd = false;
+  }
+}
+
+function openAdminBackend() {
+  loadAllFeedbacks();
+  document.getElementById("adminBackendModal").style.display = "flex";
+}
+
+function changeAdminPassword() {
+  closeModal("adminBackendModal");
+  setTimeout(() => openChangePassword(), 200);
+}
+
+function loadAllFeedbacks() {
+  const feedbacks = JSON.parse(localStorage.getItem("all_feedbacks") || "[]");
+  
+  document.getElementById("totalFeedbacks").textContent = feedbacks.length;
+  
+  if (feedbacks.length > 0) {
+    const totalStars = feedbacks.reduce((sum, fb) => sum + fb.star, 0);
+    const avgRating = (totalStars / feedbacks.length).toFixed(1);
+    document.getElementById("avgRating").textContent = avgRating;
+  } else {
+    document.getElementById("avgRating").textContent = "0.0";
+  }
+  
+  const listElement = document.getElementById("allFeedbacksList");
+  
+  if (feedbacks.length === 0) {
+    listElement.innerHTML = '<div style="text-align:center;padding:40px;color:#999">暂无用户反馈</div>';
+    return;
+  }
+  
+  const sortedFeedbacks = [...feedbacks].reverse();
+  
+  listElement.innerHTML = sortedFeedbacks.map(fb => `
+    <div class="feedback-item">
+      <div>
+        <span class="feedback-user">👤 ${fb.user}</span>
+        <span class="feedback-stars">${'★'.repeat(fb.star)}${'☆'.repeat(5 - fb.star)}</span>
+        <span class="feedback-time">${fb.time}</span>
+      </div>
+      <div class="feedback-text">${fb.text.replace(/\n/g, '<br>')}</div>
+    </div>
+  `).join("");
+}
+
+function exportFeedbacks() {
+  const feedbacks = JSON.parse(localStorage.getItem("all_feedbacks") || "[]");
+  
+  if (feedbacks.length === 0) {
+    alert("暂无反馈数据可导出");
+    return;
+  }
+  
+  const jsonStr = JSON.stringify(feedbacks, null, 2);
+  const blob = new Blob([jsonStr], { type: "application/json" });
+  
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `用户反馈_${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  
+  alert(`✅ 已导出 ${feedbacks.length} 条反馈`);
+}
+
+function clearAllFeedbacks() {
+  if (!confirm("⚠️ 确定要清空所有用户反馈吗？此操作不可撤销！")) return;
+  
+  localStorage.removeItem("all_feedbacks");
+  loadAllFeedbacks();
+  alert("✅ 所有反馈已清空");
+}
+
+function logoutAdmin() {
+  closeModal("adminBackendModal");
+  document.getElementById("adminPassword").value = "";
+}
 </script>
 </body>
 </html>
+ 
